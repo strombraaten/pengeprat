@@ -2,9 +2,9 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "sparekalkulator",
+      "name": "pengeprat",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["serve", "sparekalkulator", "-p", "4321"],
+      "runtimeArgs": ["serve", "pengeprat", "-p", "4321"],
       "port": 4321
     }
   ]

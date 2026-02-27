@@ -393,7 +393,7 @@ function rendreOppsummering() {
 
 function byggKopierTekst() {
   const linjer = [
-    `Sparekalkulator — Pengeprat`,
+    `Pengeprat`,
     ``,
     `Månedslønn: ${formatKr(state.lønn)}`,
     ``,

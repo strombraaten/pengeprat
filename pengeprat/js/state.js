@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'pengeprat_sparekalkulator_v3';
+const STORAGE_KEY = 'pengeprat_v1';
 
 export const state = {
   lønn: null,
