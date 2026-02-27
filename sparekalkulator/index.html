@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="utf-8">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Finn ut hvordan du kan fordele månedslønnen din.">
+  <title>Sparekalkulator — Pengeprat</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="main-frame">
+
+      <!-- ══════════════════════════════════════════════
+           VIEW: Inngang
+      ══════════════════════════════════════════════ -->
+      <section id="inngang" class="view aktiv">
+        <h1>Pengeprat — Sparekalkulator</h1>
+
+        <p class="ingress">
+          Økonomisk frihet handler om kontroll.<br>
+          Få en plan på 5 minutter.
+        </p>
+
+        <div class="field-group">
+          <label for="lønn-input">Månedslønn etter skatt</label>
+          <div class="input-suffix-wrap">
+            <input
+              id="lønn-input"
+              type="text"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              placeholder="f.eks. 35000"
+              autocomplete="off"
+            >
+            <span class="input-suffix">kr</span>
+          </div>
+        </div>
+
+        <button id="start-knapp" class="primary" disabled>Start →</button>
+
+        <div class="privacy-notice">
+          <p>Vi lagrer planen din lokalt i nettleseren din. Ingen data sendes til noen server.</p>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════
+           VIEW: Oversikt
+      ══════════════════════════════════════════════ -->
+      <section id="oversikt" class="view">
+        <div class="oversikt-header">
+          <div>
+            <span class="oversikt-lønn-label">Månedslønn</span>
+            <span id="oversikt-lønn" class="beløp-stor"></span>
+          </div>
+          <button id="endre-lønn-knapp">Endre lønn</button>
+        </div>
+
+        <p class="ingress">
+          Her er et forslag til hvordan pengeflyten din kan se ut.
+          Klikk på hver post for å tilpasse til din situasjon.
+        </p>
+
+        <div class="bar-container" id="oversikt-bar"></div>
+
+        <div id="oversikt-kort" class="project-list"></div>
+
+        <div class="result-card" style="margin-top: var(--space-5);">
+          <div class="result-row">
+            <span class="result-label">Total</span>
+            <span id="oversikt-total" class="result-value"></span>
+          </div>
+        </div>
+
+        <div style="margin-top: var(--space-6);">
+          <button id="se-oppsummering-knapp" class="primary full-width">
+            Se oppsummering av planen din →
+          </button>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════
+           VIEW: Detalj (dynamisk – populeres av main.js)
+      ══════════════════════════════════════════════ -->
+      <section id="detalj" class="view">
+        <button id="detalj-tilbake-knapp" class="back-link">← Oversikt</button>
+
+        <h1 id="detalj-tittel"></h1>
+
+        <div class="detalj-beløp-rad">
+          <span id="detalj-beløp" class="beløp-stor"></span>
+          <span class="text-muted">/mnd</span>
+        </div>
+
+        <p id="detalj-forklaring" class="forklaring"></p>
+
+        <!-- Faste utgifter: direkte tekstinput -->
+        <div id="detalj-faste-gruppe" class="section hidden">
+          <div class="field-group">
+            <label for="detalj-faste-input">Dine månedlige faste utgifter</label>
+            <div class="input-suffix-wrap">
+              <input
+                id="detalj-faste-input"
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                autocomplete="off"
+              >
+              <span class="input-suffix">kr</span>
+            </div>
+          </div>
+          <p class="hint">
+            Når du endrer dette, justeres de andre postene automatisk for å balansere budsjettet.
+          </p>
+        </div>
+
+        <!-- Andre poster: slider -->
+        <div id="detalj-slider-gruppe" class="section hidden">
+          <label class="label-small">Hvor mye vil du spare per måned?</label>
+          <div class="slider-wrapper">
+            <div class="slider-verdi">
+              <span id="detalj-slider-verdi" class="beløp-stor"></span>
+              <span class="text-muted">/mnd</span>
+            </div>
+            <input id="detalj-slider" type="range" class="full-width">
+            <div class="slider-labels">
+              <span id="detalj-slider-min"></span>
+              <span id="detalj-slider-max"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Allerede spart (buffer, ferie, storeLivshendelser) -->
+        <div id="detalj-spart-gruppe" class="section hidden">
+          <div class="field-group">
+            <label for="detalj-spart-input">Har du noe spart allerede?</label>
+            <div class="input-suffix-wrap">
+              <input
+                id="detalj-spart-input"
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                placeholder="0"
+                autocomplete="off"
+              >
+              <span class="input-suffix">kr</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Målbeløp-input (storeLivshendelser) -->
+        <div id="detalj-mål-input-gruppe" class="section hidden">
+          <div class="field-group">
+            <label for="detalj-mål-input">Hva er målet ditt?</label>
+            <div class="input-suffix-wrap">
+              <input
+                id="detalj-mål-input"
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                placeholder="f.eks. 150000"
+                autocomplete="off"
+              >
+              <span class="input-suffix">kr</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tidshorisont-visning (poster med harTidshorisont) -->
+        <div id="detalj-tidshorisont-gruppe" class="result-card hidden" style="margin-bottom: var(--space-5);">
+          <div class="result-row">
+            <span class="result-label" id="detalj-mål-label">Mål</span>
+            <span id="detalj-mål-verdi" class="result-value accent"></span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Mangler</span>
+            <span id="detalj-mangler" class="result-value"></span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">Tid til mål</span>
+            <span id="detalj-tid" class="result-value accent"></span>
+          </div>
+        </div>
+
+        <!-- Guilt-free: kr per uke -->
+        <div id="detalj-uke-gruppe" class="result-card hidden" style="margin-bottom: var(--space-5);">
+          <div class="result-row">
+            <span class="result-label">Ca. per uke</span>
+            <span id="detalj-per-uke" class="result-value accent"></span>
+          </div>
+        </div>
+
+        <!-- Pensjon: årsbeløp + advarsel -->
+        <div id="detalj-pensjon-gruppe" class="result-card hidden" style="margin-bottom: var(--space-5);">
+          <div class="result-row">
+            <span class="result-label">Årlig sum</span>
+            <span id="detalj-pensjon-år" class="result-value"></span>
+          </div>
+          <div id="detalj-pensjon-advarsel" class="result-row hidden">
+            <span class="result-label warning-text">⚠ Skattefradrag</span>
+            <span class="result-value small-text text-muted">Under 1 250 kr/mnd utnytter du ikke hele IPS-fradraget</span>
+          </div>
+        </div>
+
+        <button id="detalj-lagre-knapp" class="primary full-width">
+          Tilbake til oversikt
+        </button>
+      </section>
+
+      <!-- ══════════════════════════════════════════════
+           VIEW: Oppsummering
+      ══════════════════════════════════════════════ -->
+      <section id="oppsummering" class="view">
+        <h1>Din plan er klar</h1>
+
+        <div class="result-card" style="margin-bottom: var(--space-6);">
+          <div class="result-row">
+            <span class="result-label">Månedslønn</span>
+            <span id="oppsummering-lønn" class="result-value accent"></span>
+          </div>
+        </div>
+
+        <div id="oppsummering-poster" class="result-card" style="margin-bottom: var(--space-6);"></div>
+
+        <div class="result-card" style="margin-bottom: var(--space-6);">
+          <h3 style="margin-bottom: var(--space-4);">Neste steg: sett opp faste overføringer</h3>
+          <p style="margin-bottom: var(--space-4);">
+            Legg inn automatiske trekk i nettbanken 2–3 dager etter lønningsdagen:
+          </p>
+          <div id="oppsummering-overføringer"></div>
+        </div>
+
+        <div class="button-row">
+          <button id="kopier-knapp" class="primary">
+            Kopier til utklippstavle
+          </button>
+          <span id="kopiert-melding" class="kopiert-melding">✓ Kopiert!</span>
+        </div>
+
+        <div style="display: flex; gap: var(--space-3); align-items: center; margin-bottom: var(--space-5);">
+          <button id="tilbake-til-oversikt-knapp">← Tilbake til oversikt</button>
+          <button id="start-på-nytt-knapp" class="danger">Start på nytt</button>
+        </div>
+
+        <div class="privacy-notice">
+          <p>Vi lagrer planen din lokalt i nettleseren din. Ingen data sendes til noen server.</p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
