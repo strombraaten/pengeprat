@@ -1,0 +1,17 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PrivacyNotice from '../components/PrivacyNotice.astro';
+import UventetSumPage from '../components/UventetSumPage';
+---
+
+<Layout title="Uventet sum — Pengeprat" description="Fordel en uventet inntekt mellom sparing, gjeld og noe gøy.">
+  <a href="/" class="back-link">← Pengeprat</a>
+  <h1>Uventet sum</h1>
+  <p style="margin-bottom: var(--space-6);">
+    Fått inn penger utenom det vanlige? Bruk sliderne til å fordele beløpet mellom ulike kategorier.
+  </p>
+
+  <UventetSumPage client:load />
+
+  <PrivacyNotice />
+</Layout>

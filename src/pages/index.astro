@@ -1,0 +1,40 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PrivacyNotice from '../components/PrivacyNotice.astro';
+---
+
+<Layout title="Pengeprat — Personlig økonomi">
+  <h1>Pengeprat</h1>
+
+  <p style="margin-bottom: var(--space-7);">
+    Enkle verktøy som hjelper deg å ta grep om egen økonomi. Ingen innlogging, ingen sporing — alt skjer lokalt i nettleseren din.
+  </p>
+
+  <div class="project-list">
+    <a href="/sparekalkulator" class="project-item">
+      <span class="project-number">01</span>
+      <div class="project-content">
+        <h2>Sparekalkulator</h2>
+        <p>Finn ut hvor mye du kan spare, sett deg mål, og se hvordan du kan fordele sparingen din.</p>
+        <span class="tag">kalkulator</span>
+      </div>
+      <span class="project-arrow">→</span>
+    </a>
+
+    <a href="/uventet-sum" class="project-item">
+      <span class="project-number">02</span>
+      <div class="project-content">
+        <h2>Uventet sum</h2>
+        <p>Fått inn penger utenom det vanlige? Fordel beløpet smart mellom sparing, gjeld og noe gøy.</p>
+        <span class="tag">verktøy</span>
+      </div>
+      <span class="project-arrow">→</span>
+    </a>
+  </div>
+
+  <PrivacyNotice />
+
+  <footer>
+    Simen Strøm Braaten
+  </footer>
+</Layout>
