@@ -395,21 +395,11 @@ footer {
   margin-bottom: var(--space-3);
 }
 
-.goal-item--expanded {
-  border-color: var(--border-hover);
-}
-
 .goal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--space-3);
-}
-
-.goal-name {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--text);
 }
 
 .goal-remove {
@@ -423,6 +413,7 @@ footer {
 
 .goal-remove:hover {
   color: var(--danger);
+  border-color: transparent;
 }
 
 /* Responsive */

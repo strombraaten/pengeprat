@@ -1,43 +1,26 @@
-# Astro Starter Kit: Minimal
+# Pengeprat
+
+Enkle verktøy for personlig økonomi. Ingen innlogging, ingen sporing — alt skjer lokalt i nettleseren.
+
+**[strombraaten.github.io/pengeprat](https://strombraaten.github.io/pengeprat)**
+
+## Verktøy
+
+| Verktøy | Beskrivelse |
+|---|---|
+| [Pengeprat](pengeprat/) | Fordel månedslønnen din på sparing og faste utgifter |
+| [Uventet sum](uventet-sum/) | Fordel en uventet inntekt mellom kategorier |
+
+## Utvikling
+
+Ren HTML/CSS/JS — ingen byggsteg, ingen avhengigheter.
 
 ```sh
-npm create astro@latest -- --template minimal
+npx serve . -p 4321
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Åpne [localhost:4321](http://localhost:4321).
 
-## 🚀 Project Structure
+## Hosting
 
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
-
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
-
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+GitHub Pages serverer direkte fra `main`-branchen. Push til `main` → live på 1–2 minutter.

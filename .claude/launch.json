@@ -4,7 +4,7 @@
     {
       "name": "pengeprat",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["serve", "pengeprat", "-p", "4321"],
+      "runtimeArgs": ["serve", ".", "-p", "4321"],
       "port": 4321
     }
   ]
