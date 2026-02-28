@@ -223,29 +223,51 @@ input[type="number"]::-webkit-inner-spin-button {
 input[type="range"] {
   -webkit-appearance: none;
   width: 100%;
-  height: 4px;
+  height: 6px;
   background: var(--border);
-  border-radius: 2px;
+  border-radius: 3px;
   outline: none;
+  cursor: pointer;
+  padding-block: 10px; /* øker klikkbar flate uten å endre visuell høyde */
 }
 
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 14px;
-  height: 14px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: var(--accent);
   cursor: pointer;
   border: 2px solid var(--bg);
+  transition: background 0.15s, transform 0.1s;
+}
+
+input[type="range"]:hover::-webkit-slider-thumb {
+  background: color-mix(in srgb, var(--accent) 80%, white);
+  transform: scale(1.15);
+}
+
+input[type="range"]:active::-webkit-slider-thumb {
+  transform: scale(0.95);
 }
 
 input[type="range"]::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: var(--accent);
   cursor: pointer;
   border: 2px solid var(--bg);
+  transition: background 0.15s, transform 0.1s;
+}
+
+input[type="range"]:hover::-moz-range-thumb {
+  background: color-mix(in srgb, var(--accent) 80%, white);
+  transform: scale(1.15);
+}
+
+input[type="range"]:active::-moz-range-thumb {
+  transform: scale(0.95);
 }
 
 /* Buttons */

@@ -24,10 +24,6 @@
           <label for="amount">Hvor mye har du fått?</label>
           <input id="amount" type="number" min="0" step="1000" placeholder="f.eks. 50000">
         </div>
-        <div class="field-group">
-          <label for="source">Kilde (valgfritt)</label>
-          <input id="source" type="text" placeholder="f.eks. bonus, arv, skatteoppgjør">
-        </div>
       </section>
 
       <section class="section">
@@ -74,7 +70,7 @@
         const lagret = localStorage.getItem(STORAGE_KEY);
         if (lagret) return JSON.parse(lagret);
       } catch {}
-      return { amount: 0, source: '', categories: klonaKategorier() };
+      return { amount: 0, categories: klonaKategorier() };
     }
 
     function lagreState() {
@@ -119,7 +115,6 @@
 
     // --- DOM-refs ---
     const amountInput    = document.getElementById('amount');
-    const sourceInput    = document.getElementById('source');
     const barWrap        = document.getElementById('bar-wrap');
     const kategoriListe  = document.getElementById('kategori-liste');
     const leggTilBtn     = document.getElementById('legg-til-btn');
@@ -129,18 +124,12 @@
 
     // --- Startverdi på inputs ---
     amountInput.value = state.amount || '';
-    sourceInput.value = state.source || '';
 
     // --- Statiske lyttere ---
     amountInput.addEventListener('input', () => {
       state.amount = Number(amountInput.value) || 0;
       lagreState();
       render();
-    });
-
-    sourceInput.addEventListener('input', () => {
-      state.source = sourceInput.value;
-      lagreState();
     });
 
     leggTilBtn.addEventListener('click', () => {
@@ -155,10 +144,9 @@
     });
 
     slettBtn.addEventListener('click', () => {
-      state = { amount: 0, source: '', categories: klonaKategorier() };
+      state = { amount: 0, categories: klonaKategorier() };
       localStorage.removeItem(STORAGE_KEY);
       amountInput.value = '';
-      sourceInput.value = '';
       render();
     });
 
