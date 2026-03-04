@@ -30,8 +30,9 @@
         <h3>Fordeling</h3>
         <div id="bar-wrap"></div>
         <div id="kategori-liste"></div>
-        <div style="margin-top: var(--space-3);">
+        <div style="margin-top: var(--space-3); display: flex; gap: var(--space-3);">
           <button id="legg-til-btn">+ Legg til kategori</button>
+          <button id="nullstill-btn">Nullstill fordeling</button>
         </div>
       </section>
 
@@ -39,10 +40,6 @@
         <h3>Oppsummering</h3>
         <div class="result-card" id="oppsummering-innhold"></div>
       </section>
-
-      <div style="margin-top: var(--space-6);">
-        <button class="danger" id="slett-btn">Slett mine data</button>
-      </div>
 
       <div class="privacy-notice">
         <p>Dataene dine lagres kun lokalt i nettleseren din. Ingenting sendes til noen server.</p>
@@ -59,16 +56,24 @@
     ];
 
     const DEFAULT_CATEGORIES = [
-      { id: 'buffer',  name: 'Nødfond / buffer',     percent: 30, color: COLORS[0] },
-      { id: 'gjeld',   name: 'Nedbetale gjeld',       percent: 20, color: COLORS[1] },
-      { id: 'sparing', name: 'Langsiktig sparing',    percent: 30, color: COLORS[2] },
-      { id: 'gøy',     name: 'Noe gøy',               percent: 20, color: COLORS[3] },
+      { id: 'buffer',             name: 'Buffer',              percent: 25, color: COLORS[0] },
+      { id: 'guiltFree',          name: 'Guilt-free spending', percent: 20, color: COLORS[1] },
+      { id: 'ferie',              name: 'Ferie',               percent: 20, color: COLORS[2] },
+      { id: 'storeLivshendelser', name: 'Store livshendelser', percent: 20, color: COLORS[3] },
+      { id: 'pensjon',            name: 'Pensjon',             percent: 15, color: COLORS[4] },
     ];
 
     function lastState() {
       try {
         const lagret = localStorage.getItem(STORAGE_KEY);
-        if (lagret) return JSON.parse(lagret);
+        if (lagret) {
+          const data = JSON.parse(lagret);
+          // Migrasjon: legg til locked:false på kategorier som mangler feltet
+          if (data.categories) {
+            data.categories = data.categories.map(k => ({ locked: false, ...k }));
+          }
+          return data;
+        }
       } catch {}
       return { amount: 0, categories: klonaKategorier() };
     }
@@ -78,7 +83,7 @@
     }
 
     function klonaKategorier() {
-      return DEFAULT_CATEGORIES.map(k => ({ ...k }));
+      return DEFAULT_CATEGORIES.map(k => ({ ...k, locked: false }));
     }
 
     function formatKr(n) {
@@ -97,16 +102,23 @@
         .replace(/"/g, '&quot;');
     }
 
-    // Når én slider flyttes, fordeles resten proporsjonalt
+    // Når én slider flyttes låses den; kun frie kategorier redistribueres
     function normaliserProsenter(endretId, nyProsent) {
-      const andre = state.categories.filter(k => k.id !== endretId);
-      const andreTotal = andre.reduce((s, k) => s + k.percent, 0);
-      const gjenværende = 100 - nyProsent;
+      const låsteAndre = state.categories.filter(k => k.id !== endretId &&  k.locked);
+      const frie       = state.categories.filter(k => k.id !== endretId && !k.locked);
+
+      const låstTotal   = låsteAndre.reduce((s, k) => s + k.percent, 0);
+      const faktiskPros = Math.min(nyProsent, 100 - låstTotal);
+      const gjenværende = 100 - låstTotal - faktiskPros;
+
+      const friTotal = frie.reduce((s, k) => s + k.percent, 0);
 
       state.categories = state.categories.map(k => {
-        if (k.id === endretId) return { ...k, percent: nyProsent };
-        if (andreTotal === 0) return { ...k, percent: Math.round(gjenværende / andre.length) };
-        return { ...k, percent: Math.round(gjenværende * (k.percent / andreTotal)) };
+        if (k.id === endretId) return { ...k, percent: faktiskPros, locked: true };
+        if (k.locked)          return k;
+        if (frie.length === 0) return k;
+        if (friTotal === 0)    return { ...k, percent: Math.round(gjenværende / frie.length) };
+        return { ...k, percent: Math.round(gjenværende * (k.percent / friTotal)) };
       });
     }
 
@@ -118,7 +130,7 @@
     const barWrap        = document.getElementById('bar-wrap');
     const kategoriListe  = document.getElementById('kategori-liste');
     const leggTilBtn     = document.getElementById('legg-til-btn');
-    const slettBtn       = document.getElementById('slett-btn');
+    const nullstillBtn   = document.getElementById('nullstill-btn');
     const oppSeksjon     = document.getElementById('oppsummering-section');
     const oppInnhold     = document.getElementById('oppsummering-innhold');
 
@@ -137,16 +149,16 @@
         id:      genId(),
         name:    '',
         percent: 0,
+        locked:  false,
         color:   COLORS[state.categories.length % COLORS.length],
       });
       lagreState();
       render();
     });
 
-    slettBtn.addEventListener('click', () => {
-      state = { amount: 0, categories: klonaKategorier() };
-      localStorage.removeItem(STORAGE_KEY);
-      amountInput.value = '';
+    nullstillBtn.addEventListener('click', () => {
+      state.categories = klonaKategorier();
+      lagreState();
       render();
     });
 
@@ -206,7 +218,10 @@
                 style="background:transparent;border:none;color:var(--text);font-family:var(--font);font-size:0.85rem;font-weight:500;padding:0;outline:none;flex:1;"
               >
             </div>
-            <button class="goal-remove kat-fjern" data-id="${k.id}">fjern</button>
+            <div style="display:flex;align-items:center;gap:var(--space-2);">
+              ${k.locked ? `<button class="goal-remove kat-lås-opp" data-id="${k.id}">lås opp</button>` : ''}
+              <button class="goal-remove kat-fjern" data-id="${k.id}">fjern</button>
+            </div>
           </div>
           <div class="slider-wrapper">
             <div class="slider-verdi">${visVerdi}</div>
@@ -235,6 +250,7 @@
       });
 
       kategoriListe.querySelectorAll('.kat-slider').forEach(slider => {
+        // input: smooth patching under drag (ingen DOM-gjenskaping)
         slider.addEventListener('input', e => {
           normaliserProsenter(e.target.dataset.id, Number(e.target.value));
           lagreState();
@@ -242,6 +258,8 @@
           renderBar();
           renderOppsummering();
         });
+        // change: full re-render ved slipp, slik at «lås opp»-knapper vises
+        slider.addEventListener('change', () => render());
       });
 
       kategoriListe.querySelectorAll('.kat-fjern').forEach(btn => {
@@ -249,11 +267,23 @@
           const gjenværende = state.categories.filter(k => k.id !== e.target.dataset.id);
           if (gjenværende.length === 0) return;
           const total = gjenværende.reduce((s, k) => s + k.percent, 0);
-          state.categories = total === 0
-            ? gjenværende.map(k => ({ ...k, percent: Math.round(100 / gjenværende.length) }))
-            : gjenværende.map(k => ({ ...k, percent: Math.round(k.percent * (100 / total)) }));
+          // Nullstill låser og redistribuer proporsjonalt etter strukturendring
+          state.categories = gjenværende.map(k => ({
+            ...k,
+            locked:  false,
+            percent: total === 0
+              ? Math.round(100 / gjenværende.length)
+              : Math.round(k.percent * (100 / total)),
+          }));
           lagreState();
           render();
+        });
+      });
+
+      kategoriListe.querySelectorAll('.kat-lås-opp').forEach(btn => {
+        btn.addEventListener('click', e => {
+          const kat = state.categories.find(k => k.id === e.target.dataset.id);
+          if (kat) { kat.locked = false; lagreState(); render(); }
         });
       });
     }
