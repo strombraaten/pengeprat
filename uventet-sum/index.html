@@ -150,6 +150,24 @@
       render();
     });
 
+    // Oppdater slider-verdier og visning uten å gjenskape DOM
+    function updateSliderDisplays() {
+      const harBeløp = state.amount > 0;
+      state.categories.forEach(k => {
+        const item = kategoriListe.querySelector(`[data-id="${k.id}"]`);
+        if (!item) return;
+        const slider = item.querySelector('.kat-slider');
+        if (slider) slider.value = k.percent;
+        const verdiEl = item.querySelector('.slider-verdi');
+        if (verdiEl) {
+          const krVerdi = Math.round(state.amount * k.percent / 100);
+          verdiEl.innerHTML = harBeløp
+            ? `<span class="beløp-stor">${krVerdi.toLocaleString('nb-NO')} kr</span>`
+            : `<span class="beløp-stor">${k.percent}%</span>`;
+        }
+      });
+    }
+
     // --- Render ---
     function render() {
       renderBar();
@@ -166,7 +184,15 @@
     }
 
     function renderKategorier() {
-      kategoriListe.innerHTML = state.categories.map(k => `
+      kategoriListe.innerHTML = state.categories.map(k => {
+        const harBeløp = state.amount > 0;
+        const krVerdi  = Math.round(state.amount * k.percent / 100);
+        const visVerdi = harBeløp
+          ? `<span class="beløp-stor">${krVerdi.toLocaleString('nb-NO')} kr</span>`
+          : `<span class="beløp-stor">${k.percent}%</span>`;
+        const minLabel = harBeløp ? '0 kr' : '0%';
+        const maxLabel = harBeløp ? formatKr(state.amount) : '100%';
+        return `
         <div class="goal-item" data-id="${k.id}">
           <div class="goal-header">
             <div style="display:flex;align-items:center;gap:var(--space-2);flex:1;">
@@ -182,22 +208,22 @@
             </div>
             <button class="goal-remove kat-fjern" data-id="${k.id}">fjern</button>
           </div>
-          <div style="display:flex;align-items:center;gap:var(--space-4);margin-top:var(--space-2);">
+          <div class="slider-wrapper">
+            <div class="slider-verdi">${visVerdi}</div>
             <input
               type="range"
-              class="kat-slider"
+              class="kat-slider full-width"
               data-id="${k.id}"
               min="0" max="100"
               value="${k.percent}"
-              style="flex:1;"
             >
-            <span style="font-size:0.8rem;color:var(--text-secondary);min-width:36px;text-align:right;">${k.percent}%</span>
+            <div class="slider-labels">
+              <span>${minLabel}</span>
+              <span>${maxLabel}</span>
+            </div>
           </div>
-          ${state.amount > 0
-            ? `<div style="margin-top:var(--space-2);font-size:0.75rem;color:var(--text-muted);">= ${formatKr(state.amount * k.percent / 100)}</div>`
-            : ''}
         </div>
-      `).join('');
+      `}).join('');
 
       // Koblinger til dynamisk genererte elementer
       kategoriListe.querySelectorAll('.kat-navn').forEach(input => {
@@ -212,7 +238,9 @@
         slider.addEventListener('input', e => {
           normaliserProsenter(e.target.dataset.id, Number(e.target.value));
           lagreState();
-          render();
+          updateSliderDisplays();
+          renderBar();
+          renderOppsummering();
         });
       });
 
