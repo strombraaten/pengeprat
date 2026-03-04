@@ -5,7 +5,7 @@
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Finn ut hvordan du kan fordele månedslønnen din.">
-  <title>Pengeprat</title>
+  <title>Fordeling</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -16,7 +16,8 @@
            VIEW: Inngang
       ══════════════════════════════════════════════ -->
       <section id="inngang" class="view aktiv">
-        <h1>Pengeprat</h1>
+        <a href="../" class="back-link">← Oversikt</a>
+        <h1>Fordeling</h1>
 
         <p class="ingress">
           Økonomisk frihet handler om kontroll.<br>
@@ -49,12 +50,10 @@
            VIEW: Oversikt
       ══════════════════════════════════════════════ -->
       <section id="oversikt" class="view">
+        <button id="endre-lønn-knapp" class="back-link">← Endre lønn</button>
         <div class="oversikt-header">
-          <div>
-            <span class="oversikt-lønn-label">Månedslønn</span>
-            <span id="oversikt-lønn" class="beløp-stor"></span>
-          </div>
-          <button id="endre-lønn-knapp">Endre lønn</button>
+          <span class="oversikt-lønn-label">Månedslønn</span>
+          <span id="oversikt-lønn" class="beløp-stor"></span>
         </div>
 
         <p class="ingress">
