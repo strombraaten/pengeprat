@@ -50,6 +50,7 @@ const el = {
   detaljSliderMax: document.getElementById('detalj-slider-max'),
 
   detaljSpartGruppe: document.getElementById('detalj-spart-gruppe'),
+  detaljSpareavtaleHint: document.getElementById('detalj-spareavtale-hint'),
   detaljSpartInput: document.getElementById('detalj-spart-input'),
 
   detaljMålInputGruppe: document.getElementById('detalj-mål-input-gruppe'),
@@ -174,6 +175,7 @@ el.detaljSpartInput.addEventListener('input', () => {
   if (!aktivPost) return;
   const verdi = parseNummer(el.detaljSpartInput.value) ?? 0;
   state.poster[aktivPost].alleredeSpart = verdi;
+  oppdaterMånedligHvisMålNådd(aktivPost);
   lagreState();
   oppdaterDetaljVisning();
 });
@@ -182,6 +184,7 @@ el.detaljMålInput.addEventListener('input', () => {
   if (aktivPost !== 'storeLivshendelser') return;
   const verdi = parseNummer(el.detaljMålInput.value) ?? null;
   state.poster.storeLivshendelser.mål = verdi;
+  oppdaterMånedligHvisMålNådd(aktivPost);
   lagreState();
   oppdaterDetaljVisning();
 });
@@ -276,6 +279,7 @@ function åpneDetalj(postId) {
     const max = sliderMax(state.lønn, kat.sliderMaxFaktor);
     el.detaljSlider.min = min;
     el.detaljSlider.max = max;
+    el.detaljSlider.step = 50;
     el.detaljSlider.value = post.månedlig ?? 0;
     el.detaljSliderMin.textContent = formatKr(min);
     el.detaljSliderMax.textContent = formatKr(max);
@@ -314,7 +318,25 @@ function oppdaterDetaljVisning() {
   el.detaljBeløp.textContent = formatKr(månedlig);
   if (kat.inputType === 'slider') {
     el.detaljSliderVerdi.textContent = formatKr(månedlig);
+    // Juster slider-min til 0 når sparemål er nådd, slik at 0 kr er mulig å velge
+    if (kat.harTidshorisont) {
+      const m = post.mål ?? 0;
+      const s = post.alleredeSpart ?? 0;
+      const målNådd = m > 0 && s >= m;
+      el.detaljSlider.min = målNådd ? 0 : sliderMin();
+      el.detaljSliderMin.textContent = formatKr(målNådd ? 0 : sliderMin());
+    }
     el.detaljSlider.value = månedlig;
+  }
+
+  // Hint: vis når slideren er på laveste verdi (50 kr) — men ikke når mål er nådd
+  if (kat.inputType === 'slider') {
+    const målNådd = kat.harTidshorisont
+      && (post.mål ?? 0) > 0
+      && (post.alleredeSpart ?? 0) >= (post.mål ?? 0);
+    el.detaljSpareavtaleHint.style.display = (månedlig <= sliderMin() && !målNådd) ? '' : 'none';
+    el.detaljSpareavtaleHint.textContent =
+      'En lav fast spareavtale er lettere å justere opp eller ned enn å starte på nytt.';
   }
 
   // Tidshorisont
@@ -418,6 +440,15 @@ function byggKopierTekst() {
 }
 
 // ─── Hjelpefunksjoner ─────────────────────────────────────────────────────────
+
+function oppdaterMånedligHvisMålNådd(postId) {
+  const post = state.poster[postId];
+  const mål = post.mål ?? 0;
+  const alleredeSpart = post.alleredeSpart ?? 0;
+  if (mål > 0 && alleredeSpart >= mål) {
+    post.månedlig = 0;
+  }
+}
 
 function parseNummer(str) {
   if (!str) return null;
