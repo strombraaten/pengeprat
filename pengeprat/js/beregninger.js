@@ -126,6 +126,7 @@ export function beregnGuiltFreeRange(lønn) {
 
 export function beregnMånederTilMål(mål, alleredeSpart, månedlig) {
   const mangler = Math.max(0, mål - alleredeSpart);
+  if (mangler === 0) return 0;
   if (månedlig <= 0) return Infinity;
   return Math.ceil(mangler / månedlig);
 }
