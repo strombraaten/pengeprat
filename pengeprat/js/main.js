@@ -33,6 +33,7 @@ const el = {
   oversiktTotal: document.getElementById('oversikt-total'),
   endreLønnKnapp: document.getElementById('endre-lønn-knapp'),
   seOppsummeringKnapp: document.getElementById('se-oppsummering-knapp'),
+  tilbakestillKnapp: document.getElementById('tilbakestill-knapp'),
 
   // Detalj
   detaljTilbakeKnapp: document.getElementById('detalj-tilbake-knapp'),
@@ -72,13 +73,16 @@ const el = {
   detaljLagreKnapp: document.getElementById('detalj-lagre-knapp'),
 
   // Oppsummering
-  oppsummeringLønn: document.getElementById('oppsummering-lønn'),
-  oppsummeringPoster: document.getElementById('oppsummering-poster'),
   oppsummeringOverføringer: document.getElementById('oppsummering-overføringer'),
-  kopierKnapp: document.getElementById('kopier-knapp'),
-  koptertMelding: document.getElementById('kopiert-melding'),
+  oppsummeringKontekstTekst: document.getElementById('oppsummering-kontekst-tekst'),
   tilbakeTilOversiktKnapp: document.getElementById('tilbake-til-oversikt-knapp'),
-  startPåNyttKnapp: document.getElementById('start-på-nytt-knapp'),
+  bekreftWrapper: document.getElementById('bekreft-wrapper'),
+  bekreftKnapp1: document.getElementById('bekreft-knapp-1'),
+  bekreftSteg2: document.getElementById('bekreft-steg-2'),
+  bekreftKnapp2: document.getElementById('bekreft-knapp-2'),
+
+  // Feiring
+  feiringTilbakeKnapp: document.getElementById('feiring-tilbake-knapp'),
 };
 
 // ─── Inngang: event listeners ────────────────────────────────────────────────
@@ -138,6 +142,18 @@ el.oversiktKort.addEventListener('click', (e) => {
   if (kort) åpneDetalj(kort.dataset.postId);
 });
 
+el.tilbakestillKnapp.addEventListener('click', () => {
+  const fordeling = beregnStandardfordeling(state.lønn);
+  for (const [key, beløp] of Object.entries(fordeling)) {
+    state.poster[key].månedlig = beløp;
+  }
+  for (const key of Object.keys(state.interaksjon)) {
+    state.interaksjon[key] = false;
+  }
+  lagreState();
+  rendreOversikt();
+});
+
 // ─── Detalj: event listeners ─────────────────────────────────────────────────
 
 el.detaljTilbakeKnapp.addEventListener('click', gåTilOversikt);
@@ -191,26 +207,24 @@ el.detaljMålInput.addEventListener('input', () => {
 
 // ─── Oppsummering: event listeners ───────────────────────────────────────────
 
-el.kopierKnapp.addEventListener('click', async () => {
-  const tekst = byggKopierTekst();
-  try {
-    await navigator.clipboard.writeText(tekst);
-    el.koptertMelding.classList.add('synlig');
-    setTimeout(() => el.koptertMelding.classList.remove('synlig'), 2500);
-  } catch (e) {
-    // Fallback: prompt bruker til å kopiere manuelt
-    prompt('Kopier planen din:', tekst);
-  }
-});
-
 el.tilbakeTilOversiktKnapp.addEventListener('click', gåTilOversikt);
 
-el.startPåNyttKnapp.addEventListener('click', () => {
-  tilbakestillState();
-  el.lønnInput.value = '';
-  el.startKnapp.disabled = true;
-  visView('inngang');
-  el.lønnInput.focus();
+el.bekreftKnapp1.addEventListener('click', () => {
+  el.bekreftKnapp1.classList.add('hidden');
+  el.bekreftSteg2.classList.remove('hidden');
+});
+
+el.bekreftKnapp2.addEventListener('click', async () => {
+  const { default: confetti } = await import('https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.module.mjs');
+  confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+  setTimeout(() => confetti({ particleCount: 80, angle: 60, spread: 55, origin: { x: 0 } }), 250);
+  setTimeout(() => confetti({ particleCount: 80, angle: 120, spread: 55, origin: { x: 1 } }), 400);
+  setTimeout(() => visView('feiring'), 1200);
+});
+
+el.feiringTilbakeKnapp.addEventListener('click', () => {
+  rendreOppsummering();
+  visView('oppsummering');
 });
 
 // ─── Navigasjon ───────────────────────────────────────────────────────────────
@@ -249,6 +263,14 @@ function rendreOversikt() {
       </div>
     `;
   }).join('');
+
+  // Vis/skjul tilbakestill-knapp
+  const harEndringer = Object.values(state.interaksjon).some((v) => v);
+  if (harEndringer) {
+    el.tilbakestillKnapp.classList.remove('hidden');
+  } else {
+    el.tilbakestillKnapp.classList.add('hidden');
+  }
 }
 
 // ─── Render: Detalj ───────────────────────────────────────────────────────────
@@ -377,32 +399,19 @@ function oppdaterDetaljVisning() {
 // ─── Render: Oppsummering ─────────────────────────────────────────────────────
 
 function rendreOppsummering() {
-  el.oppsummeringLønn.textContent = formatKr(state.lønn);
-
-  // Poster-liste
-  el.oppsummeringPoster.innerHTML = KATEGORIER.map((kat) => {
-    const beløp = state.poster[kat.id]?.månedlig ?? 0;
-    return `
-      <div class="result-row">
-        <span class="result-label">
-          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${kat.farge};margin-right:8px;vertical-align:middle;"></span>
-          ${kat.navn}
-        </span>
-        <span class="result-value">${formatKr(beløp)}/mnd</span>
-      </div>
-    `;
-  }).join('');
-
   // Neste steg: bare spareposter og pensjon
   const overføringsPoster = KATEGORIER.filter((k) =>
-    ['buffer', 'ferie', 'storeLivshendelser', 'pensjon'].includes(k.id)
+    ['buffer', 'guiltFree', 'ferie', 'storeLivshendelser', 'pensjon'].includes(k.id)
   );
 
   el.oppsummeringOverføringer.innerHTML = overføringsPoster
     .map((kat) => {
       const beløp = state.poster[kat.id]?.månedlig ?? 0;
       if (beløp === 0) return '';
-      const kontoType = kat.id === 'pensjon' ? 'IPS (pensjonssparing)' : 'sparekonto';
+      const kontoType =
+        kat.id === 'pensjon' ? 'IPS (pensjonssparing)' :
+        kat.id === 'guiltFree' ? 'forbrukskonto' :
+        'sparekonto';
       return `
         <div class="result-row">
           <span class="result-label">→ ${kat.navn}</span>
@@ -411,6 +420,23 @@ function rendreOppsummering() {
       `;
     })
     .join('');
+
+  // Tilbakestill bekreft-seksjonen
+  el.bekreftKnapp1.classList.remove('hidden');
+  el.bekreftSteg2.classList.add('hidden');
+  if (!el.bekreftWrapper.contains(el.bekreftKnapp1)) {
+    el.bekreftWrapper.innerHTML = '';
+    el.bekreftWrapper.appendChild(el.bekreftKnapp1);
+    el.bekreftWrapper.appendChild(el.bekreftSteg2);
+  }
+
+  // Kontekstuell oppsummeringstekst
+  const lønn = formatKr(state.lønn);
+  const faste = formatKr(state.poster.fasteUtgifter.månedlig);
+  const guiltFree = formatKr(state.poster.guiltFree.månedlig);
+  el.oppsummeringKontekstTekst.textContent =
+    `Dette er basert på at månedslønnen din er ${lønn}, at du har ${faste} i faste utgifter, ` +
+    `og at du bruker ${guiltFree} til hygge og livets opphold den måneden.`;
 }
 
 function byggKopierTekst() {
@@ -428,7 +454,7 @@ function byggKopierTekst() {
     ``,
     `Neste steg: sett opp faste overføringer i nettbanken`,
     ...KATEGORIER.filter((k) =>
-      ['buffer', 'ferie', 'storeLivshendelser', 'pensjon'].includes(k.id)
+      ['buffer', 'guiltFree', 'ferie', 'storeLivshendelser', 'pensjon'].includes(k.id)
     )
       .filter((kat) => (state.poster[kat.id]?.månedlig ?? 0) > 0)
       .map((kat) => {

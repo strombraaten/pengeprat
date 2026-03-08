@@ -65,6 +65,10 @@
 
         <div id="oversikt-kort" class="project-list"></div>
 
+        <div style="margin-top: var(--space-3); text-align: right;">
+          <button id="tilbakestill-knapp" class="hidden">↩ Tilbakestill til forslaget</button>
+        </div>
+
         <div class="result-card" style="margin-top: var(--space-5);">
           <div class="result-row">
             <span class="result-label">Total</span>
@@ -214,33 +218,50 @@
       <section id="oppsummering" class="view">
         <h1>Din plan er klar</h1>
 
-        <div class="result-card" style="margin-bottom: var(--space-6);">
-          <div class="result-row">
-            <span class="result-label">Månedslønn</span>
-            <span id="oppsummering-lønn" class="result-value accent"></span>
-          </div>
-        </div>
-
-        <div id="oppsummering-poster" class="result-card" style="margin-bottom: var(--space-6);"></div>
+        <h3 style="margin-bottom: var(--space-3);">Neste steg: sett opp faste overføringer</h3>
+        <p style="margin-bottom: var(--space-4);">Legg inn automatiske trekk i nettbanken 2–3 dager etter lønningsdagen:</p>
 
         <div class="result-card" style="margin-bottom: var(--space-6);">
-          <h3 style="margin-bottom: var(--space-4);">Neste steg: sett opp faste overføringer</h3>
-          <p style="margin-bottom: var(--space-4);">
-            Legg inn automatiske trekk i nettbanken 2–3 dager etter lønningsdagen:
-          </p>
+          <p class="label-small" style="margin-bottom: var(--space-4);">Dine faste trekk</p>
           <div id="oppsummering-overføringer"></div>
         </div>
 
-        <div class="button-row">
-          <button id="kopier-knapp" class="primary">
-            Kopier til utklippstavle
-          </button>
-          <span id="kopiert-melding" class="kopiert-melding">✓ Kopiert!</span>
+        <p id="oppsummering-kontekst-tekst" style="margin-bottom: var(--space-4); margin-top: var(--space-6);"></p>
+        <p style="margin-bottom: var(--space-2);">Ser det bra ut, eller er det noe du trenger å justere?</p>
+        <div style="display: flex; gap: var(--space-3); align-items: flex-start; flex-wrap: wrap; margin-bottom: var(--space-6);">
+          <button id="tilbake-til-oversikt-knapp" style="color: var(--text);">← Gå tilbake til oversikt</button>
+          <div id="bekreft-wrapper">
+            <button id="bekreft-knapp-1" class="primary">Ferdig, har satt opp de faste trekkene</button>
+            <div id="bekreft-steg-2" class="hidden" style="margin-top: var(--space-5);">
+              <p style="margin-bottom: var(--space-4);">Er du sikker på at du har gjort alt du skal? Hvis ikke fortjener du ikke det som kommer.</p>
+              <button id="bekreft-knapp-2" class="primary">Ja, jeg er klar!</button>
+            </div>
+          </div>
         </div>
 
-        <div style="display: flex; gap: var(--space-3); align-items: center; margin-bottom: var(--space-5);">
-          <button id="tilbake-til-oversikt-knapp">← Tilbake til oversikt</button>
-          <button id="start-på-nytt-knapp" class="danger">Start på nytt</button>
+      </section>
+
+      <section id="feiring" class="view">
+        <p style="margin-bottom: var(--space-5);">
+          <button id="feiring-tilbake-knapp" style="color: var(--text-muted);">← Planen din</button>
+        </p>
+
+        <h1>Du er god!</h1>
+
+        <p style="margin-bottom: var(--space-6);">
+          Å sette opp automatiske trekk er en av de viktigste tingene du kan gjøre for sparingen din.
+          Nå skjer det av seg selv — uten at du trenger å tenke på det.
+        </p>
+
+        <h3 style="margin-bottom: var(--space-3);">Vil du spare mer?</h3>
+        <p class="text-muted" style="margin-bottom: var(--space-6);">
+          Test ut planen din en måned først, og se over de faste utgiftene dine
+          om det er noe du kan kutte ut eller justere på. Det er bedre å starte litt rolig enn
+          for aggressivt.
+        </p>
+
+        <div style="margin-bottom: var(--space-6);">
+          <a href="../" class="primary">Gå til alle verktøyene</a>
         </div>
 
         <div class="privacy-notice">
