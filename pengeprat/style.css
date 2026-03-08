@@ -286,7 +286,8 @@ input[type="range"]::-moz-range-thumb {
 
 /* ─── Buttons ─── */
 
-button {
+button,
+a.primary {
   font-family: var(--font);
   font-size: 0.75rem;
   cursor: pointer;
@@ -297,6 +298,8 @@ button {
   padding: var(--space-2) var(--space-4);
   letter-spacing: 0.03em;
   transition: border-color 0.15s, color 0.15s, background 0.15s;
+  text-decoration: none;
+  display: inline-block;
 }
 
 button:hover {
@@ -309,7 +312,8 @@ button:disabled {
   cursor: not-allowed;
 }
 
-button.primary {
+button.primary,
+a.primary {
   background: var(--accent-dim);
   border-color: var(--accent-dim);
   color: #fff;
@@ -317,7 +321,8 @@ button.primary {
   font-size: 0.8rem;
 }
 
-button.primary:hover:not(:disabled) {
+button.primary:hover:not(:disabled),
+a.primary:hover {
   background: var(--accent);
   border-color: var(--accent);
 }
