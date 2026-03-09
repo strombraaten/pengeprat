@@ -55,16 +55,16 @@ body {
   min-height: 100vh;
 }
 
-/* :not(.ds-button) – utelater lenker med DS-knapp-styling,
-   ellers vil vår a-fargeregel (ulayered) vinne over DS sin
-   .ds-button { color } (i @layer ds.components). */
-a:not(.ds-button) {
+/* :not(.ds-button):not(.ds-link) – utelater lenker med DS-knapp-styling og DS-lenke-styling.
+   .ds-link setter text-decoration:underline og egen farge via @layer ds.components;
+   uten :not(.ds-link) ville vår unlayered regel fjerne understrek og overstyre fargen. */
+a:not(.ds-button):not(.ds-link) {
   color: var(--text-secondary);
   text-decoration: none;
   transition: color 0.15s;
 }
 
-a:not(.ds-button):hover {
+a:not(.ds-button):not(.ds-link):hover {
   color: var(--text);
 }
 
@@ -186,6 +186,14 @@ label, .label-small {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: var(--space-2);
+}
+
+/* DS-field-komponenten bruker >*+*{ margin-top } for avstand mellom label og input.
+   Uten denne regelen vil vår label { margin-bottom } summere med DS sin margin-top
+   og gi dobbel avstand. Vi nullstiller margin-bottom for label som er direkte barn
+   av <ds-field> eller .ds-field, slik at bare DS sin margin-top gjelder der. */
+:is(ds-field, .ds-field) > label {
+  margin-bottom: 0;
 }
 
 /* ds-field: vi overstyrer DS sitt standard display slik at feltgruppen
