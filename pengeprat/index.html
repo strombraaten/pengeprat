@@ -26,7 +26,8 @@
       ══════════════════════════════════════════════ -->
       <section id="inngang" class="view aktiv">
         <a href="../" class="back-link">← Oversikt</a>
-        <h1>Fordeling</h1>
+        <!-- data-size="md": sidetittel for inngang-view -->
+        <h1 class="ds-heading" data-size="md">Fordeling</h1>
 
         <p class="ingress">
           Økonomisk frihet handler om kontroll.<br>
@@ -102,7 +103,7 @@
       <section id="detalj" class="view">
         <button id="detalj-tilbake-knapp" class="back-link" type="button">← Oversikt</button>
 
-        <h1 id="detalj-tittel"></h1>
+        <h1 class="ds-heading" data-size="md" id="detalj-tittel"></h1>
 
         <div class="detalj-beløp-rad">
           <span id="detalj-beløp" class="beløp-stor"></span>
@@ -232,9 +233,10 @@
            VIEW: Oppsummering
       ══════════════════════════════════════════════ -->
       <section id="oppsummering" class="view">
-        <h1>Din plan er klar</h1>
+        <h1 class="ds-heading" data-size="md">Din plan er klar</h1>
 
-        <h3 style="margin-bottom: var(--space-3);">Neste steg: sett opp faste overføringer</h3>
+        <!-- data-size="xs": underseksjon, holder seg inne i den rolige flyten -->
+        <h3 class="ds-heading" data-size="xs" style="margin-bottom: var(--space-3);">Neste steg: sett opp faste overføringer</h3>
         <p style="margin-bottom: var(--space-4);">Legg inn automatiske trekk i nettbanken 2–3 dager etter lønningsdagen:</p>
 
         <div class="result-card" style="margin-bottom: var(--space-6);">
@@ -263,14 +265,14 @@
           <button id="feiring-tilbake-knapp" class="back-link" type="button">← Planen din</button>
         </p>
 
-        <h1>Du er god!</h1>
+        <h1 class="ds-heading" data-size="md">Du er god!</h1>
 
         <p style="margin-bottom: var(--space-6);">
           Å sette opp automatiske trekk er en av de viktigste tingene du kan gjøre for sparingen din.
           Nå skjer det av seg selv — uten at du trenger å tenke på det.
         </p>
 
-        <h3 style="margin-bottom: var(--space-3);">Vil du spare mer?</h3>
+        <h3 class="ds-heading" data-size="xs" style="margin-bottom: var(--space-3);">Vil du spare mer?</h3>
         <p class="text-muted" style="margin-bottom: var(--space-6);">
           Test ut planen din en måned først, og se over de faste utgiftene dine
           om det er noe du kan kutte ut eller justere på. Det er bedre å starte litt rolig enn

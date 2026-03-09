@@ -100,32 +100,13 @@ a:not(.ds-button):hover {
 }
 
 /* ─── Typografi ───────────────────────────────────────────────────────────── */
+/* font-size, font-weight, letter-spacing og line-height styres av .ds-heading
+   [data-size] fra @digdir/designsystemet-css. Vi setter bare margin-bottom
+   for riktig visuell avstand mellom overskrift og innhold. */
 
-h1, h2, h3 {
-  font-weight: 500;
-  letter-spacing: 0.02em;
-}
-
-h1 {
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  margin-bottom: var(--space-7);
-  letter-spacing: 0.06em;
-}
-
-h2 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: var(--space-2);
-}
-
-h3 {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  margin-bottom: var(--space-3);
-}
+h1 { margin-bottom: var(--space-5); }
+h2 { margin-bottom: var(--space-2); }
+h3 { margin-bottom: var(--space-3); }
 
 p {
   color: var(--text-secondary);
