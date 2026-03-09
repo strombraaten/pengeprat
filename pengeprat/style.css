@@ -1,19 +1,28 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
-
+/* ─── TOKEN-BRO ───────────────────────────────────────────────────────────────
+   Pengeprat-appen laster sin egen CSS (pengeprat/style.css), ikke rot-nivåets
+   style.css. Derfor gjentas hele token-broen her.
+   Mapper egne variabler til Designsystemetets --ds-*-tokens, slik at all
+   eksisterende kode automatisk bruker det nye lyse temaet.
+   ─────────────────────────────────────────────────────────────────────────── */
 :root {
-  --bg: #0a0a0a;
-  --surface: #131313;
-  --border: #1e1e1e;
-  --border-hover: #2a2a2a;
-  --text: #d4d4d4;
-  --text-secondary: #737373;
-  --text-muted: #525252;
-  --accent: #6a9fb5;
-  --accent-dim: #4a7a8a;
-  --danger: #b56a6a;
-  --success: #6ab57a;
-  --warning: #b5a06a;
-  --font: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  /* Farger: bro til DS-tokens */
+  --bg:             var(--ds-color-neutral-background-default);
+  --surface:        var(--ds-color-neutral-background-tinted);
+  --border:         var(--ds-color-neutral-border-subtle);
+  --border-hover:   var(--ds-color-neutral-border-default);
+  --text:           var(--ds-color-neutral-text-default);
+  --text-secondary: var(--ds-color-neutral-text-subtle);
+  --text-muted:     var(--ds-color-neutral-text-subtle);
+  --accent:         var(--ds-color-accent-text-default);
+  --accent-dim:     var(--ds-color-accent-border-strong);
+  --danger:         var(--ds-color-danger-text-default);
+  --success:        var(--ds-color-success-text-default);
+  --warning:        var(--ds-color-warning-text-default);
+
+  /* Inter fra Designsystemet */
+  --font: var(--ds-font-family);
+
+  /* Layout og spacing – beholdes som eksakt pikselverdi */
   --max-width: 720px;
   --space-1: 4px;
   --space-2: 8px;
@@ -23,13 +32,13 @@
   --space-6: 32px;
   --space-7: 48px;
   --space-8: 64px;
-  --radius: 2px;
+  --radius: var(--ds-border-radius-sm);
 }
 
+/* box-sizing beholdes her; margin/padding-reset ligger i src/reset.css
+   inni @layer pengeprat.reset slik at DS-komponent-stilene vinner */
 *, *::before, *::after {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 html {
@@ -46,18 +55,22 @@ body {
   min-height: 100vh;
 }
 
-a {
+/* :not(.ds-button) – utelater lenker med DS-knapp-styling,
+   ellers vil vår a-fargeregel (ulayered) vinne over DS sin
+   .ds-button { color } (i @layer ds.components). */
+a:not(.ds-button) {
   color: var(--text-secondary);
   text-decoration: none;
   transition: color 0.15s;
 }
 
-a:hover {
+a:not(.ds-button):hover {
   color: var(--text);
 }
 
-/* ─── Views ─── */
+/* ─── Views (router) ─────────────────────────────────────────────────────── */
 
+/* Views er skjult inntil router.js setter .aktiv-klassen */
 .view {
   display: none;
 }
@@ -70,7 +83,7 @@ a:hover {
   display: none !important;
 }
 
-/* ─── Layout ─── */
+/* ─── Layout ──────────────────────────────────────────────────────────────── */
 
 .container {
   max-width: var(--max-width);
@@ -80,19 +93,17 @@ a:hover {
 
 .main-frame {
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--ds-border-radius-md);
   padding: var(--space-7) var(--space-6);
   background: var(--surface);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.02),
-    0 0 80px -20px rgba(106, 159, 181, 0.04);
+  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.08);
 }
 
-/* ─── Typography ─── */
+/* ─── Typografi ───────────────────────────────────────────────────────────── */
 
 h1, h2, h3 {
   font-weight: 500;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
 }
 
 h1 {
@@ -100,6 +111,7 @@ h1 {
   text-transform: uppercase;
   color: var(--text-secondary);
   margin-bottom: var(--space-7);
+  letter-spacing: 0.06em;
 }
 
 h2 {
@@ -174,7 +186,7 @@ p {
   width: 100%;
 }
 
-/* ─── Section spacing ─── */
+/* ─── Seksjonsspacing ─────────────────────────────────────────────────────── */
 
 .section {
   margin-bottom: var(--space-6);
@@ -184,7 +196,7 @@ p {
   margin-bottom: 0;
 }
 
-/* ─── Forms ─── */
+/* ─── Skjema ──────────────────────────────────────────────────────────────── */
 
 label, .label-small {
   display: block;
@@ -195,18 +207,27 @@ label, .label-small {
   margin-bottom: var(--space-2);
 }
 
+/* ds-field: vi overstyrer DS sitt standard display slik at feltgruppen
+   oppfører seg som vår eksisterende .field-group-struktur */
+ds-field {
+  display: block;
+  margin-bottom: var(--space-5);
+}
+
 .field-group {
   margin-bottom: var(--space-5);
 }
 
+/* Input med "kr"-suffix til høyre */
 .input-suffix-wrap {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.input-suffix-wrap input {
+.input-suffix-wrap .ds-input {
   flex: 1;
+  /* Gjør plass til "kr"-suffixet på høyre side */
   padding-right: var(--space-8);
 }
 
@@ -218,26 +239,18 @@ label, .label-small {
   pointer-events: none;
 }
 
-input[type="text"],
+/* Spinner-knapper på number-input er uønsket */
 input[type="number"] {
-  width: 100%;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  font-family: var(--font);
-  font-size: 0.85rem;
-  padding: var(--space-3) var(--space-4);
-  transition: border-color 0.15s;
-  outline: none;
+  -moz-appearance: textfield;
 }
 
-input[type="text"]:focus,
-input[type="number"]:focus {
-  border-color: var(--accent-dim);
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
-/* ─── Range slider ─── */
+/* ─── Range slider ────────────────────────────────────────────────────────── */
 
 .slider-wrapper {
   margin-top: var(--space-2);
@@ -259,21 +272,22 @@ input[type="range"] {
 
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: var(--accent);
   cursor: pointer;
-  border: 2px solid var(--bg);
+  border: 3px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--accent);
 }
 
 input[type="range"]::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: var(--accent);
   cursor: pointer;
-  border: 2px solid var(--bg);
+  border: 3px solid var(--surface);
 }
 
 .slider-labels {
@@ -284,56 +298,29 @@ input[type="range"]::-moz-range-thumb {
   color: var(--text-muted);
 }
 
-/* ─── Buttons ─── */
+/* ─── Knapper ─────────────────────────────────────────────────────────────── */
+/* .ds-button styres av @digdir/designsystemet-css.
+   .back-link er tekstlignende navigasjonsknapp (brukes som <button> og <a>). */
 
-button,
-a.primary {
-  font-family: var(--font);
-  font-size: 0.75rem;
-  cursor: pointer;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: transparent;
-  color: var(--text-secondary);
-  padding: var(--space-2) var(--space-4);
-  letter-spacing: 0.03em;
-  transition: border-color 0.15s, color 0.15s, background 0.15s;
-  text-decoration: none;
-  display: inline-block;
-}
-
-button:hover {
-  border-color: var(--border-hover);
-  color: var(--text);
-}
-
-button:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
-button.primary,
-a.primary {
-  background: var(--accent-dim);
-  border-color: var(--accent-dim);
-  color: #fff;
-  padding: var(--space-3) var(--space-5);
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   font-size: 0.8rem;
+  font-family: var(--font);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-6);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  text-decoration: none;
+  transition: color 0.15s;
 }
 
-button.primary:hover:not(:disabled),
-a.primary:hover {
-  background: var(--accent);
-  border-color: var(--accent);
-}
-
-button.danger {
-  color: var(--danger);
-  border-color: transparent;
-}
-
-button.danger:hover {
-  border-color: var(--danger);
+.back-link:hover {
+  color: var(--text);
+  background: none;
 }
 
 .button-row {
@@ -343,7 +330,7 @@ button.danger:hover {
   margin-bottom: var(--space-5);
 }
 
-/* ─── Result card ─── */
+/* ─── Resultatkort ────────────────────────────────────────────────────────── */
 
 .result-card {
   background: var(--bg);
@@ -378,7 +365,7 @@ button.danger:hover {
   color: var(--accent);
 }
 
-/* ─── Post list (oversikt) ─── */
+/* ─── Postliste (oversikt-view) ───────────────────────────────────────────── */
 
 .project-list {
   display: flex;
@@ -402,7 +389,7 @@ button.danger:hover {
 }
 
 .project-item:hover {
-  background: rgba(255, 255, 255, 0.01);
+  background: var(--ds-color-neutral-background-hover, rgba(0, 0, 0, 0.02));
 }
 
 .project-dot {
@@ -454,7 +441,7 @@ button.danger:hover {
   color: var(--text-secondary);
 }
 
-/* ─── Oversikt header ─── */
+/* ─── Oversikt-header ─────────────────────────────────────────────────────── */
 
 .oversikt-header {
   margin-bottom: var(--space-6);
@@ -469,7 +456,7 @@ button.danger:hover {
   margin-bottom: var(--space-1);
 }
 
-/* ─── Detalj view ─── */
+/* ─── Detalj-view ─────────────────────────────────────────────────────────── */
 
 .detalj-beløp-rad {
   display: flex;
@@ -478,40 +465,7 @@ button.danger:hover {
   margin-bottom: var(--space-5);
 }
 
-/* ─── Back link ─── */
-
-.back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  margin-bottom: var(--space-6);
-  cursor: pointer;
-  background: none;
-  border: none;
-  padding: 0;
-  font-family: var(--font);
-  letter-spacing: 0.03em;
-  transition: color 0.15s;
-}
-
-.back-link:hover {
-  color: var(--text-secondary);
-}
-
-/* ─── Privacy notice ─── */
-
-.privacy-notice {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  border-top: 1px solid var(--border);
-  padding-top: var(--space-5);
-  margin-top: var(--space-7);
-  line-height: 1.8;
-}
-
-/* ─── Bar visualization ─── */
+/* ─── Bar-visualisering ───────────────────────────────────────────────────── */
 
 .bar-container {
   display: flex;
@@ -526,7 +480,7 @@ button.danger:hover {
   transition: width 0.3s ease;
 }
 
-/* ─── Copy feedback ─── */
+/* ─── Kopiert-feedback ────────────────────────────────────────────────────── */
 
 .kopiert-melding {
   display: inline-block;
@@ -541,7 +495,18 @@ button.danger:hover {
   opacity: 1;
 }
 
-/* ─── Responsive ─── */
+/* ─── Privat-merknad ──────────────────────────────────────────────────────── */
+
+.privacy-notice {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-5);
+  margin-top: var(--space-7);
+  line-height: 1.8;
+}
+
+/* ─── Responsivt ──────────────────────────────────────────────────────────── */
 
 @media (max-width: 600px) {
   .container {
@@ -559,9 +524,5 @@ button.danger:hover {
 
   .button-row {
     flex-direction: column;
-  }
-
-  button.primary.full-width {
-    width: 100%;
   }
 }

@@ -1,0 +1,21 @@
+/* ─── BASIS-RESET I LAG ──────────────────────────────────────────────────────
+   Pakker margin/padding-reset inn i @layer slik at Designsystemetets
+   komponent-CSS (i @layer ds.components) vinner over denne og beholder
+   sin designede padding og margin.
+
+   CSS-lag-prioritet (høyest vinner):
+     1. @layer pengeprat.reset  → lavest (erklæres FØR DS, taper mot DS)
+     2. @layer ds.theme, ds.base, ds.components  → midt
+     3. Ulayered CSS (style.css)  → høyest (vinner over alle lag)
+
+   Dette gir oss ønsket atferd:
+     – DS-knapper og -felt beholder sin padding/margin
+     – Vanlige HTML-elementer (p, h1, ul) nullstilles som forventet
+     – Vår egendefinerte style.css kan overstyre alt
+   ─────────────────────────────────────────────────────────────────────────── */
+@layer pengeprat.reset {
+  *, *::before, *::after {
+    margin: 0;
+    padding: 0;
+  }
+}
