@@ -1,11 +1,20 @@
 <!DOCTYPE html>
-<html lang="nb">
+<!-- data-ds-color-mode: aktiverer Designsystemetets lyse fargepalett via CSS custom properties -->
+<html lang="nb" data-ds-color-mode="light">
 <head>
   <meta charset="utf-8">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Enkle verktøy for personlig økonomi.">
   <title>Pengeprat — Personlig økonomi</title>
+
+  <!-- Inter-font fra Google Fonts (Designsystemet bruker Inter som standard) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+
+  <!-- Designsystemet + egne stiler lastes via Vite-entry-point -->
+  <script type="module" src="/src/main.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>

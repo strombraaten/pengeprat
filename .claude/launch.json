@@ -3,10 +3,9 @@
   "configurations": [
     {
       "name": "pengeprat",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["serve", "."],
-      "port": 4321,
-      "autoPort": true
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "--port", "4321"],
+      "port": 4321
     }
   ]
 }

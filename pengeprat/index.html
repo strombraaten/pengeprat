@@ -1,11 +1,20 @@
 <!DOCTYPE html>
-<html lang="nb">
+<!-- data-ds-color-mode: aktiverer Designsystemetets lyse fargepalett -->
+<html lang="nb" data-ds-color-mode="light">
 <head>
   <meta charset="utf-8">
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Finn ut hvordan du kan fordele månedslønnen din.">
   <title>Fordeling</title>
+
+  <!-- Inter-font (Designsystemet bruker Inter som standard) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+
+  <!-- Designsystemet + egne stiler -->
+  <script type="module" src="/src/main.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -24,12 +33,14 @@
           Få en plan på 5 minutter.
         </p>
 
-        <div class="field-group">
-          <label for="lønn-input">Månedslønn etter skatt</label>
+        <!-- ds-field kobler label, input og hjelpetekst med riktige aria-attributter -->
+        <ds-field class="field-group">
+          <label>Månedslønn etter skatt</label>
           <div class="input-suffix-wrap">
             <input
               id="lønn-input"
               type="text"
+              class="ds-input"
               inputmode="numeric"
               pattern="[0-9]*"
               placeholder="f.eks. 35000"
@@ -37,9 +48,10 @@
             >
             <span class="input-suffix">kr</span>
           </div>
-        </div>
+        </ds-field>
 
-        <button id="start-knapp" class="primary" disabled>Start →</button>
+        <!-- .ds-button: Designsystemetets knapp-klasse (erstatter button.primary) -->
+        <button id="start-knapp" class="ds-button" type="button" disabled>Start →</button>
 
         <div class="privacy-notice">
           <p>Vi lagrer planen din lokalt i nettleseren din. Ingen data sendes til noen server.</p>
@@ -50,7 +62,7 @@
            VIEW: Oversikt
       ══════════════════════════════════════════════ -->
       <section id="oversikt" class="view">
-        <button id="endre-lønn-knapp" class="back-link">← Endre lønn</button>
+        <button id="endre-lønn-knapp" class="back-link" type="button">← Endre lønn</button>
         <div class="oversikt-header">
           <span class="oversikt-lønn-label">Månedslønn</span>
           <span id="oversikt-lønn" class="beløp-stor"></span>
@@ -66,7 +78,8 @@
         <div id="oversikt-kort" class="project-list"></div>
 
         <div style="margin-top: var(--space-3); text-align: right;">
-          <button id="tilbakestill-knapp" class="hidden">↩ Tilbakestill til forslaget</button>
+          <!-- data-variant="tertiary": minimalknapp uten ramme -->
+          <button id="tilbakestill-knapp" class="ds-button hidden" type="button" data-variant="tertiary">↩ Tilbakestill til forslaget</button>
         </div>
 
         <div class="result-card" style="margin-top: var(--space-5);">
@@ -77,7 +90,7 @@
         </div>
 
         <div style="margin-top: var(--space-6);">
-          <button id="se-oppsummering-knapp" class="primary full-width">
+          <button id="se-oppsummering-knapp" class="ds-button" type="button" data-fullwidth>
             Se oppsummering av planen din →
           </button>
         </div>
@@ -87,7 +100,7 @@
            VIEW: Detalj (dynamisk – populeres av main.js)
       ══════════════════════════════════════════════ -->
       <section id="detalj" class="view">
-        <button id="detalj-tilbake-knapp" class="back-link">← Oversikt</button>
+        <button id="detalj-tilbake-knapp" class="back-link" type="button">← Oversikt</button>
 
         <h1 id="detalj-tittel"></h1>
 
@@ -100,19 +113,20 @@
 
         <!-- Faste utgifter: direkte tekstinput -->
         <div id="detalj-faste-gruppe" class="section hidden">
-          <div class="field-group">
-            <label for="detalj-faste-input">Dine månedlige faste utgifter</label>
+          <ds-field class="field-group">
+            <label>Dine månedlige faste utgifter</label>
             <div class="input-suffix-wrap">
               <input
                 id="detalj-faste-input"
                 type="text"
+                class="ds-input"
                 inputmode="numeric"
                 pattern="[0-9]*"
                 autocomplete="off"
               >
               <span class="input-suffix">kr</span>
             </div>
-          </div>
+          </ds-field>
           <p class="hint">
             Når du endrer dette, justeres de andre postene automatisk for å balansere budsjettet.
           </p>
@@ -137,12 +151,13 @@
 
         <!-- Allerede spart (buffer, ferie, storeLivshendelser) -->
         <div id="detalj-spart-gruppe" class="section hidden">
-          <div class="field-group">
-            <label for="detalj-spart-input">Har du noe spart allerede?</label>
+          <ds-field class="field-group">
+            <label>Har du noe spart allerede?</label>
             <div class="input-suffix-wrap">
               <input
                 id="detalj-spart-input"
                 type="text"
+                class="ds-input"
                 inputmode="numeric"
                 pattern="[0-9]*"
                 placeholder="0"
@@ -150,17 +165,18 @@
               >
               <span class="input-suffix">kr</span>
             </div>
-          </div>
+          </ds-field>
         </div>
 
         <!-- Målbeløp-input (storeLivshendelser) -->
         <div id="detalj-mål-input-gruppe" class="section hidden">
-          <div class="field-group">
-            <label for="detalj-mål-input">Hva er målet ditt?</label>
+          <ds-field class="field-group">
+            <label>Hva er målet ditt?</label>
             <div class="input-suffix-wrap">
               <input
                 id="detalj-mål-input"
                 type="text"
+                class="ds-input"
                 inputmode="numeric"
                 pattern="[0-9]*"
                 placeholder="f.eks. 150000"
@@ -168,7 +184,7 @@
               >
               <span class="input-suffix">kr</span>
             </div>
-          </div>
+          </ds-field>
         </div>
 
         <!-- Tidshorisont-visning (poster med harTidshorisont) -->
@@ -207,7 +223,7 @@
           </div>
         </div>
 
-        <button id="detalj-lagre-knapp" class="primary full-width">
+        <button id="detalj-lagre-knapp" class="ds-button" type="button" data-fullwidth>
           Tilbake til oversikt
         </button>
       </section>
@@ -229,12 +245,13 @@
         <p id="oppsummering-kontekst-tekst" style="margin-bottom: var(--space-4); margin-top: var(--space-6);"></p>
         <p style="margin-bottom: var(--space-2);">Ser det bra ut, eller er det noe du trenger å justere?</p>
         <div style="display: flex; gap: var(--space-3); align-items: flex-start; flex-wrap: wrap; margin-bottom: var(--space-6);">
-          <button id="tilbake-til-oversikt-knapp" style="color: var(--text);">← Gå tilbake til oversikt</button>
+          <!-- data-variant="secondary": knapp med ramme, ikke fylt -->
+          <button id="tilbake-til-oversikt-knapp" class="ds-button" type="button" data-variant="secondary">← Gå tilbake til oversikt</button>
           <div id="bekreft-wrapper">
-            <button id="bekreft-knapp-1" class="primary">Ferdig, har satt opp de faste trekkene</button>
+            <button id="bekreft-knapp-1" class="ds-button" type="button">Ferdig, har satt opp de faste trekkene</button>
             <div id="bekreft-steg-2" class="hidden" style="margin-top: var(--space-5);">
               <p style="margin-bottom: var(--space-4);">Er du sikker på at du har gjort alt du skal? Hvis ikke fortjener du ikke det som kommer.</p>
-              <button id="bekreft-knapp-2" class="primary">Ja, jeg er klar!</button>
+              <button id="bekreft-knapp-2" class="ds-button" type="button">Ja, jeg er klar!</button>
             </div>
           </div>
         </div>
@@ -243,7 +260,7 @@
 
       <section id="feiring" class="view">
         <p style="margin-bottom: var(--space-5);">
-          <button id="feiring-tilbake-knapp" style="color: var(--text-muted);">← Planen din</button>
+          <button id="feiring-tilbake-knapp" class="back-link" type="button">← Planen din</button>
         </p>
 
         <h1>Du er god!</h1>
@@ -261,7 +278,8 @@
         </p>
 
         <div style="margin-bottom: var(--space-6);">
-          <a href="../" class="primary">Gå til alle verktøyene</a>
+          <!-- <a> med .ds-button gjør at lenken ser ut som en primærknapp -->
+          <a href="../" class="ds-button">Gå til alle verktøyene</a>
         </div>
 
         <div class="privacy-notice">

@@ -4,7 +4,32 @@
       "Bash(node --version:*)",
       "Bash(npm --version)",
       "Bash(pnpm:*)",
-      "Bash(yarn --version)"
+      "Bash(yarn --version)",
+      "Bash(while read id)",
+      "Bash(do)",
+      "Bash(if grep -q \"id=\"\"$id\"\"\" /Users/simenstrombraaten/dev/pengeprat/sparekalkulator/index.html)",
+      "Bash(then)",
+      "Bash(echo \"✓ $id\")",
+      "Bash(else)",
+      "Bash(echo \"✗ MANGLER: $id\")",
+      "Bash(fi)",
+      "Bash(done)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(git add sparekalkulator/ .claude/launch.json)",
+      "Bash(git commit:*)",
+      "Bash(git push)",
+      "Bash(/Users/simenstrombraaten/dev/pengeprat/.gitignore:*)",
+      "Bash(gh issue:*)",
+      "Bash(brew install gh)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:storybook.designsystemet.no)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:unpkg.com)",
+      "WebFetch(domain:app.unpkg.com)",
+      "WebSearch",
+      "WebFetch(domain:designsystemet.no)",
+      "Bash(git add .gitignore package.json package-lock.json vite.config.js .claude/launch.json .claude/settings.local.json index.html pengeprat/index.html uventet-sum/index.html src/main.js)"
     ]
   }
 }

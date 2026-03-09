@@ -1,11 +1,20 @@
 <!DOCTYPE html>
-<html lang="nb">
+<!-- data-ds-color-mode: aktiverer Designsystemetets lyse fargepalett -->
+<html lang="nb" data-ds-color-mode="light">
 <head>
   <meta charset="utf-8">
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Fordel en uventet inntekt mellom sparing, gjeld og noe gøy.">
   <title>Uventet sum — Pengeprat</title>
+
+  <!-- Inter-font (Designsystemet bruker Inter som standard) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+
+  <!-- Designsystemet + egne stiler -->
+  <script type="module" src="/src/main.js"></script>
   <link rel="stylesheet" href="../style.css">
 </head>
 <body>
@@ -20,10 +29,11 @@
 
       <section class="section">
         <h3>Beløp</h3>
-        <div class="field-group">
-          <label for="amount">Hvor mye har du fått?</label>
-          <input id="amount" type="number" min="0" step="1000" placeholder="f.eks. 50000">
-        </div>
+        <!-- ds-field kobler label og input med riktige aria-attributter automatisk -->
+        <ds-field class="field-group">
+          <label>Hvor mye har du fått?</label>
+          <input id="amount" type="number" class="ds-input" min="0" step="1000" placeholder="f.eks. 50000">
+        </ds-field>
       </section>
 
       <section class="section">
@@ -31,8 +41,9 @@
         <div id="bar-wrap"></div>
         <div id="kategori-liste"></div>
         <div style="margin-top: var(--space-3); display: flex; gap: var(--space-3);">
-          <button id="legg-til-btn">+ Legg til kategori</button>
-          <button id="nullstill-btn">Nullstill fordeling</button>
+          <!-- data-variant="secondary": outlined-knapp -->
+          <button id="legg-til-btn" class="ds-button" type="button" data-variant="secondary">+ Legg til kategori</button>
+          <button id="nullstill-btn" class="ds-button" type="button" data-variant="secondary">Nullstill fordeling</button>
         </div>
       </section>
 
@@ -196,6 +207,9 @@
     }
 
     function renderKategorier() {
+      // Kategori-navn-inputet bruker inline style for å blende inn med bakgrunnen.
+      // var(--text) og var(--font) er begge bridget til DS-tokens i style.css,
+      // så de vil automatisk bruke lyst tema-fargene.
       kategoriListe.innerHTML = state.categories.map(k => {
         const harBeløp = state.amount > 0;
         const krVerdi  = Math.round(state.amount * k.percent / 100);
@@ -219,8 +233,8 @@
               >
             </div>
             <div style="display:flex;align-items:center;gap:var(--space-2);">
-              ${k.locked ? `<button class="goal-remove kat-lås-opp" data-id="${k.id}">lås opp</button>` : ''}
-              <button class="goal-remove kat-fjern" data-id="${k.id}">fjern</button>
+              ${k.locked ? `<button class="goal-remove kat-lås-opp" type="button" data-id="${k.id}">lås opp</button>` : ''}
+              <button class="goal-remove kat-fjern" type="button" data-id="${k.id}">fjern</button>
             </div>
           </div>
           <div class="slider-wrapper">
