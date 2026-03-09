@@ -47,7 +47,11 @@
 }
 
 html {
-  font-size: 14px;
+  /* 16px er DS sin standard baseline. Alle --ds-heading-*-font-size tokens
+     er i rem og skalerer derfra. Med 14px ble forholdet mellom heading
+     og brødtekst for bratt (42px heading, 11.9px brødtekst = 3.5×).
+     Med 16px: lg-heading = 36px, brødtekst = ~14px → ratio ~2.5×. */
+  font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
