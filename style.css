@@ -26,15 +26,26 @@
   /* Layout: beholdes som eksakt pikselverdi */
   --max-width: 720px;
 
-  /* Spacing: 4px-skala (uendret fra før) */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 24px;
-  --space-6: 32px;
-  --space-7: 48px;
-  --space-8: 64px;
+  /* Spacing: bro til DS sin --ds-size-* skala (4px-grid, rem-basert og responsiv).
+     space-1..4 er direkte DS-steg; space-5..7 hopper over noen steg i DS-skalaen
+     fordi vår 4→8→12→16→24→32→48-grid ikke er lineær over hele skalaen.
+     space-8 (64px) finnes ikke som --ds-size-16 i DS (skalaen hopper 15→18),
+     så vi uttrykker det som det dobbelte av --ds-size-8. */
+  --space-1: var(--ds-size-1);           /*  4px */
+  --space-2: var(--ds-size-2);           /*  8px */
+  --space-3: var(--ds-size-3);           /* 12px */
+  --space-4: var(--ds-size-4);           /* 16px */
+  --space-5: var(--ds-size-6);           /* 24px */
+  --space-6: var(--ds-size-8);           /* 32px */
+  --space-7: var(--ds-size-12);          /* 48px */
+  --space-8: calc(var(--ds-size-8) * 2); /* 64px */
+
+  /* Font-størrelse: bro til DS sine --ds-font-size-* tokens.
+     Konsoliderer 8+ ulike rem-verdier til tre navngitte nivåer,
+     slik at globale justeringer gjøres på ett sted. */
+  --text-xs: var(--ds-font-size-1); /* 12px – metadata, merkelapper, hint */
+  --text-sm: var(--ds-font-size-2); /* 14px – brødtekst, lister, beløp   */
+  --text-xl: var(--ds-font-size-5); /* 21px – framhevet tall              */
 
   /* Border-radius: litt runder enn de opprinnelige 2px */
   --radius: var(--ds-border-radius-sm);
@@ -109,12 +120,12 @@ h3 { margin-bottom: var(--space-3); }
 
 p {
   color: var(--text-secondary);
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   line-height: 1.7;
 }
 
 small {
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--text-muted);
 }
 
@@ -122,7 +133,7 @@ small {
 
 .tag {
   display: inline-block;
-  font-size: 0.65rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -143,7 +154,7 @@ small {
   align-items: center;
   justify-content: space-between;
   padding: var(--space-4) 0;
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -177,7 +188,7 @@ small {
 }
 
 .filosofi-innhold p {
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   color: var(--text);
   line-height: 1.85;
 }
@@ -190,7 +201,7 @@ small {
 }
 
 .filosofi-innhold li {
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   color: var(--text);
   line-height: 1.7;
 }
@@ -222,7 +233,7 @@ small {
 }
 
 .project-number {
-  font-size: 0.8rem;
+  font-size: var(--text-xs);
   color: var(--text-muted);
   padding-top: 2px;
 }
@@ -243,7 +254,7 @@ small {
 
 .project-arrow {
   color: var(--text-muted);
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
   padding-top: 2px;
   transition: transform 0.15s, color 0.15s;
 }
@@ -257,7 +268,7 @@ small {
 
 label {
   display: block;
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -289,7 +300,7 @@ label {
 .input-suffix {
   position: absolute;
   right: var(--space-4);
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   color: var(--text-muted);
   pointer-events: none;
 }
@@ -320,12 +331,12 @@ input[type="number"]::-webkit-inner-spin-button {
   display: flex;
   justify-content: space-between;
   margin-top: var(--space-2);
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   color: var(--text-muted);
 }
 
 .beløp-stor {
-  font-size: 1.4rem;
+  font-size: var(--text-xl);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--text);
@@ -377,7 +388,7 @@ input[type="range"]::-moz-range-thumb {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  font-size: 0.8rem;
+  font-size: var(--text-xs);
   font-family: var(--font);
   color: var(--text-secondary);
   margin-bottom: var(--space-6);
@@ -397,7 +408,7 @@ input[type="range"]::-moz-range-thumb {
 
 /* Knapp som ikke er .ds-button og ikke .back-link: enkel sekundærstil */
 .goal-remove {
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   font-family: var(--font);
   color: var(--text-muted);
   cursor: pointer;
@@ -425,7 +436,7 @@ input[type="range"]::-moz-range-thumb {
   justify-content: space-between;
   align-items: baseline;
   padding: var(--space-2) 0;
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
 }
 
 .result-row + .result-row {
@@ -503,13 +514,13 @@ input[type="range"]::-moz-range-thumb {
 footer {
   margin-top: var(--space-7);
   padding-top: var(--space-5);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--text-muted);
   line-height: 1.8;
 }
 
 .privacy-notice {
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   color: var(--text-muted);
   border-top: 1px solid var(--border);
   padding-top: var(--space-5);
