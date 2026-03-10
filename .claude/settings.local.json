@@ -29,7 +29,10 @@
       "WebFetch(domain:app.unpkg.com)",
       "WebSearch",
       "WebFetch(domain:designsystemet.no)",
-      "Bash(git add .gitignore package.json package-lock.json vite.config.js .claude/launch.json .claude/settings.local.json index.html pengeprat/index.html uventet-sum/index.html src/main.js)"
+      "Bash(git add .gitignore package.json package-lock.json vite.config.js .claude/launch.json .claude/settings.local.json index.html pengeprat/index.html uventet-sum/index.html src/main.js)",
+      "Bash(lsof -i :4321 -i :3000 -i :5173)",
+      "Skill(commit-commands:commit-push-pr)",
+      "Skill(commit-commands:commit-push-pr:*)"
     ]
   }
 }
