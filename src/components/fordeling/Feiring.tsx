@@ -37,7 +37,7 @@ export function Feiring({ onTilbakeTilPlan }: FeiringProps) {
             &larr; Tilbake til planen
           </button>
           <Button asChild className="w-full">
-            <a href="/">Gå til alle verktøyene</a>
+            <a href={import.meta.env.BASE_URL}>Gå til alle verktøyene</a>
           </Button>
         </div>
 
