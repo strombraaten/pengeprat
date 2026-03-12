@@ -12,6 +12,7 @@ function loadInitialState(): UtgifterState {
     expandedCategories: allCategoryIds,
     selectedPreset: null,
   }
+  if (typeof window === "undefined") return defaults
   const saved = localStorage.getItem(STORAGE_KEY)
   if (!saved) return defaults
   try {
