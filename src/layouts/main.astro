@@ -1,0 +1,36 @@
+---
+import "@/styles/global.css"
+
+interface Props {
+  title?: string
+  description?: string
+}
+
+const {
+  title = "Pengeprat — Personlig økonomi",
+  description = "Enkle verktøy for personlig økonomi.",
+} = Astro.props
+---
+
+<html lang="nb">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+    <script is:inline>
+      const getThemePreference = () => {
+        if (typeof localStorage !== "undefined" && localStorage.getItem("theme")) {
+          return localStorage.getItem("theme")
+        }
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+      }
+      const isDark = getThemePreference() === "dark"
+      document.documentElement.classList[isDark ? "add" : "remove"]("dark")
+    </script>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
