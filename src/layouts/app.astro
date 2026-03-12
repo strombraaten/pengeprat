@@ -14,9 +14,11 @@ const {
 
 const pathname = Astro.url.pathname
 
+const base = import.meta.env.BASE_URL
+
 const verktøy = [
-  { href: "/fordeling", label: "Fordeling" },
-  { href: "/utgifter", label: "Utgifter" },
+  { href: `${base}/fordeling`, label: "Fordeling" },
+  { href: `${base}/utgifter`, label: "Utgifter" },
 ]
 
 function erAktiv(href: string) {
@@ -29,7 +31,7 @@ function erAktiv(href: string) {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}/favicon.svg`} />
     <title>{title}</title>
     <script is:inline>
       const getThemePreference = () => {
