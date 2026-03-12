@@ -1,0 +1,151 @@
+---
+import Layout from "@/layouts/main.astro"
+import { ModeToggle } from "@/components/ModeToggle"
+---
+
+<Layout>
+  <div class="min-h-svh flex flex-col">
+
+    <!-- Minimal top bar -->
+    <header class="border-b border-border bg-card">
+      <div class="mx-auto flex h-14 max-w-3xl items-center justify-between px-4 sm:px-6">
+        <span class="text-sm font-semibold tracking-tight text-foreground">Pengeprat</span>
+        <ModeToggle client:load />
+      </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="flex-1 py-10 px-4 sm:px-6">
+      <div class="mx-auto max-w-3xl space-y-10">
+
+        <!-- Hero -->
+        <div class="space-y-2">
+          <h1 class="text-3xl font-bold tracking-tight text-foreground">Pengeprat</h1>
+          <p class="text-muted-foreground max-w-prose leading-relaxed">
+            Enkle verktøy som hjelper deg å ta grep om egen økonomi.
+            Ingen innlogging, ingen sporing.
+          </p>
+        </div>
+
+        <!-- Tool cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          <!-- Fordeling — aktiv -->
+          <a
+            href="/fordeling"
+            class="group flex flex-col gap-4 rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/30"
+          >
+            <div class="flex items-start justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                01
+              </span>
+              <span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                Tilgjengelig
+              </span>
+            </div>
+            <div class="space-y-1">
+              <h2 class="font-semibold text-foreground">Fordeling</h2>
+              <p class="text-sm text-muted-foreground leading-relaxed">
+                Finn ut hvor mye du kan spare, sett deg mål, og se hvordan du
+                kan fordele sparingen din.
+              </p>
+            </div>
+            <div class="flex items-center gap-1.5 text-sm font-medium text-primary mt-auto">
+              <span>Start</span>
+              <span class="transition-transform group-hover:translate-x-0.5">&rarr;</span>
+            </div>
+          </a>
+
+          <!-- Månedlige utgifter — aktiv -->
+          <a
+            href="/utgifter"
+            class="group flex flex-col gap-4 rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/30"
+          >
+            <div class="flex items-start justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                02
+              </span>
+              <span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                Tilgjengelig
+              </span>
+            </div>
+            <div class="space-y-1">
+              <h2 class="font-semibold text-foreground">Månedlige utgifter</h2>
+              <p class="text-sm text-muted-foreground leading-relaxed">
+                Kartlegg faste månedlige utgifter, se fordelingen per kategori,
+                og optimiser privatøkonomien din.
+              </p>
+            </div>
+            <div class="flex items-center gap-1.5 text-sm font-medium text-primary mt-auto">
+              <span>Start</span>
+              <span class="transition-transform group-hover:translate-x-0.5">&rarr;</span>
+            </div>
+          </a>
+
+          <!-- Fått inn en uventet sum — kommer snart -->
+          <div class="flex flex-col gap-4 rounded-xl border border-border bg-card p-5 opacity-60">
+            <div class="flex items-start justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                03
+              </span>
+              <span class="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                Kommer snart
+              </span>
+            </div>
+            <div class="space-y-1">
+              <h2 class="font-semibold text-foreground">Fått inn en uventet sum?</h2>
+              <p class="text-sm text-muted-foreground leading-relaxed">
+                Få intelligente forslag basert på dine sparemål og økonomi når du
+                mottar en bonus, arvemidler eller annen uventet inntekt.
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Philosophy section -->
+        <div>
+          <h2 class="scroll-m-20 border-b border-border pb-2 text-2xl font-semibold tracking-tight">Filosofien bak</h2>
+          <p class="leading-7 mt-6 text-muted-foreground">
+            Penger er en av de vanligste kildene til frustrasjon. Både i
+            parforhold, men også i hverdagen til hver av oss. Det mange ønsker
+            seg er med andre ord økonomisk frihet. Dette handler mer om følelsen
+            av kontroll enn bare det å ha mest mulig penger. Og følelsen av
+            kontroll kan komme langt billigere enn du tror. Det handler om seks
+            punkt:
+          </p>
+          <ol class="my-6 ml-6 list-decimal [&>li]:mt-2 text-muted-foreground">
+            <li>Du kan dekke en uforutsett utgift eller fler (buffer)</li>
+            <li>Framtids-deg er tatt hånd om (pensjon)</li>
+            <li>Du kan si ja til sosiale og spontane forespørsler uten å tenke deg om (ferie og opplevelser)</li>
+            <li>Du kan kose deg innen rimelighetens grenser (guilt-free spending)</li>
+            <li>Du tenker langsiktig (bil, bryllup, hus og så videre)</li>
+            <li>Du tillater deg selv å drømme (frihetsfond)</li>
+          </ol>
+          <p class="leading-7 text-muted-foreground">
+            Disse seks punktene gjenspeiles i sparemålene og et månedlig
+            budsjett. Men når jeg sier budsjett, er ikke det noe stort og
+            omfattende, for det meste går av seg selv. Budsjettet ditt er nemlig
+            lønn minus faste utgifter minus guilt-free spending, er lik penger
+            til sparing. Og all sparing kan settes opp som faste, automatiske
+            trekk som går ut av lønningskontoen din, en til to dager etter lønna
+            kommer inn. Da sitter du igjen med det du trenger for å betale
+            regningene (faste utgifter), men også til å leve og kose deg.
+          </p>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-border/60 py-4 px-4 sm:px-6">
+      <div class="mx-auto max-w-3xl">
+        <p class="text-xs text-muted-foreground/60">
+          Ingen innlogging, ingen sporing.
+          Et av flere prosjekter <a href="https://simenlager.no/" class="underline hover:text-muted-foreground">Simen lager</a> i pappaperm.
+        </p>
+      </div>
+    </footer>
+
+  </div>
+</Layout>

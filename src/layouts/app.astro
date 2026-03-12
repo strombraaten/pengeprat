@@ -1,0 +1,93 @@
+---
+import "@/styles/global.css"
+import { ModeToggle } from "@/components/ModeToggle"
+
+interface Props {
+  title?: string
+  description?: string
+}
+
+const {
+  title = "Pengeprat — Personlig økonomi",
+  description = "Enkle verktøy for personlig økonomi.",
+} = Astro.props
+
+const pathname = Astro.url.pathname
+
+const verktøy = [
+  { href: "/fordeling", label: "Fordeling" },
+  { href: "/utgifter", label: "Utgifter" },
+]
+
+function erAktiv(href: string) {
+  return pathname === href || pathname.startsWith(href + "/")
+}
+---
+
+<html lang="nb">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+    <script is:inline>
+      const getThemePreference = () => {
+        if (typeof localStorage !== "undefined" && localStorage.getItem("theme")) {
+          return localStorage.getItem("theme")
+        }
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+      }
+      const isDark = getThemePreference() === "dark"
+      document.documentElement.classList[isDark ? "add" : "remove"]("dark")
+    </script>
+  </head>
+  <body class="min-h-svh flex flex-col">
+
+    <!-- Top nav -->
+    <header class="sticky top-0 z-10 border-b border-border bg-card">
+      <div class="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
+        <a
+          href="/"
+          class="text-sm font-semibold tracking-tight text-foreground hover:text-primary transition-colors"
+        >
+          Pengeprat
+        </a>
+        <nav class="flex items-center gap-1">
+          {verktøy.map((v) => (
+            <a
+              href={v.href}
+              class:list={[
+                "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                erAktiv(v.href)
+                  ? "bg-muted text-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+              ]}
+            >
+              {v.label}
+            </a>
+          ))}
+          <ModeToggle client:load />
+        </nav>
+      </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-border/60 py-4">
+      <div class="mx-auto max-w-5xl px-4 sm:px-6">
+        <p class="text-xs text-muted-foreground/60">
+          Ingen innlogging, ingen sporing. Et av flere prosjekter{" "}
+          <a href="https://simenlager.no/" class="underline hover:text-muted-foreground">
+            Simen lager
+          </a> i pappaperm.
+        </p>
+      </div>
+    </footer>
+
+  </body>
+</html>
