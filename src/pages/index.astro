@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/main.astro"
 import { ModeToggle } from "@/components/ModeToggle"
+import { ArrowRight } from "@phosphor-icons/react"
 ---
 
 <Layout>
@@ -52,7 +53,7 @@ import { ModeToggle } from "@/components/ModeToggle"
             </div>
             <div class="flex items-center gap-1.5 text-sm font-medium text-primary mt-auto">
               <span>Start</span>
-              <span class="transition-transform group-hover:translate-x-0.5">&rarr;</span>
+              <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
             </div>
           </a>
 
@@ -78,7 +79,7 @@ import { ModeToggle } from "@/components/ModeToggle"
             </div>
             <div class="flex items-center gap-1.5 text-sm font-medium text-primary mt-auto">
               <span>Start</span>
-              <span class="transition-transform group-hover:translate-x-0.5">&rarr;</span>
+              <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
             </div>
           </a>
 
