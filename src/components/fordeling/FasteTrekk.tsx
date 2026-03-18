@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { ArrowLeftIcon, ArrowRightIcon } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
@@ -127,10 +128,12 @@ export function FasteTrekk({
         {/* Action buttons */}
         <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-3">
           <Button variant="outline" onClick={onTilbake}>
-            ← Tilbake til fordeling
+            <ArrowLeftIcon data-icon="inline-start" /> Tilbake til fordeling
           </Button>
           <Button disabled={!alleHuketAv} onClick={onFullført}>
-            {alleHuketAv ? "Ferdig! →" : "Gå videre"}
+            {alleHuketAv ? (
+              <>Ferdig! <ArrowRightIcon data-icon="inline-end" /></>
+            ) : "Gå videre"}
           </Button>
         </div>
 

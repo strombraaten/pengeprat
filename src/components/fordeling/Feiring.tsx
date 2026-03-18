@@ -1,3 +1,4 @@
+import { ArrowLeftIcon } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 
 interface FeiringProps {
@@ -29,13 +30,14 @@ export function Feiring({ onTilbakeTilPlan }: FeiringProps) {
         </div>
 
         <div className="flex flex-col gap-2">
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={onTilbakeTilPlan}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="text-muted-foreground"
           >
-            &larr; Tilbake til planen
-          </button>
+            <ArrowLeftIcon data-icon="inline-start" /> Tilbake til planen
+          </Button>
           <Button asChild className="w-full">
             <a href={import.meta.env.BASE_URL}>Gå til alle verktøyene</a>
           </Button>
