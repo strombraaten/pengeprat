@@ -234,14 +234,14 @@ export const PRESETS: Presets = {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export const CATEGORY_COLORS = [
-  "oklch(0.508 0.118 165.612)", // teal (primary)
-  "oklch(0.577 0.110 142.495)", // green
-  "oklch(0.659 0.150 66.023)",  // amber
-  "oklch(0.546 0.126 13.080)",  // red
-  "oklch(0.582 0.137 302.717)", // purple
-  "oklch(0.562 0.148 203.023)", // cyan
-  "oklch(0.570 0.128 22.730)",  // orange
-  "oklch(0.554 0.117 340.289)", // pink
+  "oklch(0.62 0.10 250)",  // slate-blue
+  "oklch(0.65 0.10 65)",   // amber
+  "oklch(0.62 0.13 295)",  // purple
+  "oklch(0.64 0.11 22)",   // orange-red
+  "oklch(0.64 0.09 210)",  // sky-blue
+  "oklch(0.63 0.12 340)",  // rose-pink
+  "oklch(0.62 0.10 140)",  // yellow-green
+  "oklch(0.60 0.09 175)",  // teal
 ]
 
 // ═══════════════════════════════════════════════════════════════════════════════
