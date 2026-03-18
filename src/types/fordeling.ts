@@ -9,6 +9,7 @@ export type PostId =
 export type ViewId =
   | "inngang"
   | "dashboard"
+  | "fasteTrekk"
   | "feiring"
 
 export interface Kategori {

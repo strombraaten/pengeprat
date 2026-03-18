@@ -1,6 +1,7 @@
 import { useFordelingState } from "@/hooks/useFordelingState"
 import { Inngang } from "./Inngang"
 import { FordelingDashboard } from "./FordelingDashboard"
+import { FasteTrekk } from "./FasteTrekk"
 import { Feiring } from "./Feiring"
 
 export function FordelingApp() {
@@ -16,10 +17,11 @@ export function FordelingApp() {
     visView,
   } = useFordelingState()
 
-  async function handleBekreft() {
-    // Konfetti-animasjon
+  // Fires confetti and transitions to the celebration screen.
+  // Called from FasteTrekk once all transfers are checked off.
+  async function handleFullført() {
     const { default: confetti } = await import(
-      // @ts-expect-error – CDN-import uten typer
+      // @ts-expect-error – CDN-import without types
       "https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.module.mjs"
     )
     confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } })
@@ -64,7 +66,17 @@ export function FordelingApp() {
           onEndreMål={endreMål}
           onTilbakestill={tilbakestill}
           onEndreLønn={() => visView("inngang")}
-          onBekreft={handleBekreft}
+          onBekreft={() => visView("fasteTrekk")}
+        />
+      )
+
+    case "fasteTrekk":
+      return (
+        <FasteTrekk
+          lønn={state.lønn!}
+          poster={state.poster}
+          onTilbake={() => visView("dashboard")}
+          onFullført={handleFullført}
         />
       )
 
