@@ -1,18 +1,15 @@
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { KATEGORIER } from "@/lib/kategorier"
 import { formatKr } from "@/lib/formatering"
-import { KategoriSeksjon } from "./KategoriSeksjon"
-import { OppsummeringPanel } from "./OppsummeringPanel"
 import { FordelingBar } from "./FordelingBar"
+import { FordelingTabell } from "./FordelingTabell"
+import { FordelingPanel } from "./FordelingPanel"
 import type { PostId, PostState } from "@/types/fordeling"
 
 interface FordelingDashboardProps {
   lønn: number
   poster: Record<PostId, PostState>
-  interaksjon: Record<PostId, boolean>
-  expandedPost: PostId | null
-  onToggleExpanded: (postId: PostId) => void
   onEndrePost: (postId: PostId, nyVerdi: number) => void
   onEndreFasteUtgifter: (nyVerdi: number) => void
   onEndreAlleredeSpart: (postId: PostId, verdi: number) => void
@@ -25,8 +22,6 @@ interface FordelingDashboardProps {
 export function FordelingDashboard({
   lønn,
   poster,
-  expandedPost,
-  onToggleExpanded,
   onEndrePost,
   onEndreFasteUtgifter,
   onEndreAlleredeSpart,
@@ -35,76 +30,74 @@ export function FordelingDashboard({
   onEndreLønn,
   onBekreft,
 }: FordelingDashboardProps) {
+  // Local UI state — which category's side panel is open.
+  // Not persisted: resetting to null when user navigates away is correct behavior.
+  const [activePost, setActivePost] = useState<PostId | null>(null)
+
   return (
     <TooltipProvider>
-      <div className="space-y-5">
+      {/* Outer flex row: main content (flex-1) + sliding side panel */}
+      <div className="flex min-h-[calc(100svh-3.5rem)]">
 
-        {/* Inntekts-header */}
-        <div className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3 shadow-sm">
+        {/* ─── Main content column ─────────────────────────────── */}
+        <div className="flex-1 min-w-0 p-5 lg:p-8 flex flex-col gap-5">
+
+          {/* Salary header — income on the left, "Endre lønn" alongside */}
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">
-              Månedsinntekt etter skatt
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+              Fordeling
             </p>
-            <p className="text-xl font-bold tabular-nums text-foreground">
-              {formatKr(lønn)}
-            </p>
-          </div>
-          <Button variant="outline" size="sm" onClick={onEndreLønn}>
-            Endre
-          </Button>
-        </div>
-
-        {/* Fordelingsbar */}
-        <div className="rounded-xl border border-border bg-card px-4 py-3.5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-            Fordeling
-          </p>
-          <FordelingBar lønn={lønn} poster={poster} />
-        </div>
-
-        {/* Tokolonnet layout: kategorier venstre, oppsummering høyre */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-5 items-start">
-
-          {/* Venstre: kategoriseksjoner */}
-          <div className="space-y-3">
-            {KATEGORIER.map((kat) => (
-              <KategoriSeksjon
-                key={kat.id}
-                kat={kat}
-                post={poster[kat.id]}
-                lønn={lønn}
-                isExpanded={expandedPost === kat.id}
-                onToggle={() => onToggleExpanded(kat.id)}
-                onEndrePost={(nyVerdi) => onEndrePost(kat.id, nyVerdi)}
-                onEndreFasteUtgifter={onEndreFasteUtgifter}
-                onEndreAlleredeSpart={(verdi) => onEndreAlleredeSpart(kat.id, verdi)}
-                onEndreMål={(verdi) => onEndreMål(kat.id, verdi)}
-              />
-            ))}
-
-            {/* Tilbakestill */}
-            <div className="pt-1">
-              <button
-                type="button"
-                onClick={onTilbakestill}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            <div className="flex items-baseline gap-3 flex-wrap">
+              <span className="text-3xl font-extrabold tabular-nums">
+                {formatKr(lønn)}
+              </span>
+              <span className="text-sm text-muted-foreground">/ mnd</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onEndreLønn}
+                className="ml-auto lg:ml-0"
               >
-                Tilbakestill til forslaget
-              </button>
+                Endre lønn
+              </Button>
             </div>
           </div>
 
-          {/* Høyre: sticky oppsummering */}
-          <div className="lg:sticky lg:top-20">
-            <OppsummeringPanel
-              lønn={lønn}
-              poster={poster}
-              onBekreft={onBekreft}
-              onEndreLønn={onEndreLønn}
-            />
-          </div>
+          {/* Distribution bar — segments clickable to open/close side panel */}
+          <FordelingBar
+            lønn={lønn}
+            poster={poster}
+            activePost={activePost}
+            onSelectPost={setActivePost}
+          />
+
+          {/* Budget table — inline sliders + row click opens side panel */}
+          <FordelingTabell
+            lønn={lønn}
+            poster={poster}
+            activePost={activePost}
+            onSelectPost={setActivePost}
+            onEndrePost={onEndrePost}
+            onEndreFasteUtgifter={onEndreFasteUtgifter}
+            onTilbakestill={onTilbakestill}
+            onBekreft={onBekreft}
+          />
 
         </div>
+
+        {/* ─── Side panel — hidden on mobile, CSS-animated on desktop ─── */}
+        {/* lg:flex ensures the panel container is in the flex row on desktop */}
+        <div className="hidden lg:flex">
+          <FordelingPanel
+            post={activePost}
+            lønn={lønn}
+            poster={poster}
+            onClose={() => setActivePost(null)}
+            onEndreMål={onEndreMål}
+            onEndreAlleredeSpart={onEndreAlleredeSpart}
+          />
+        </div>
+
       </div>
     </TooltipProvider>
   )

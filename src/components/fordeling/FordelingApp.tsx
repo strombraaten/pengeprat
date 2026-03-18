@@ -13,7 +13,6 @@ export function FordelingApp() {
     endreAlleredeSpart,
     endreMål,
     tilbakestill,
-    toggleExpanded,
     visView,
   } = useFordelingState()
 
@@ -57,9 +56,6 @@ export function FordelingApp() {
         <FordelingDashboard
           lønn={state.lønn!}
           poster={state.poster}
-          interaksjon={state.interaksjon}
-          expandedPost={state.expandedPost}
-          onToggleExpanded={toggleExpanded}
           onEndrePost={endrePost}
           onEndreFasteUtgifter={endreFasteUtgifter}
           onEndreAlleredeSpart={endreAlleredeSpart}
