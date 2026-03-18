@@ -4,7 +4,7 @@ export const KATEGORIER: Kategori[] = [
   {
     id: "fasteUtgifter",
     navn: "Faste utgifter",
-    farge: "#636363",
+    farge: "oklch(0.58 0.16 250)",
     beskrivelse:
       "Husleie/lån, strøm, forsikring, mat, transport, abonnementer.",
     forklaring:
@@ -14,7 +14,7 @@ export const KATEGORIER: Kategori[] = [
   {
     id: "buffer",
     navn: "Buffer",
-    farge: "#6a9fb5",
+    farge: "oklch(0.62 0.15 185)",
     beskrivelse: "Penger på sparekonto for uforutsette utgifter.",
     forklaring:
       "Buffer er nødfondet ditt – pengene du har tilgjengelig hvis noe uventet skjer. Målet er å ha 1,5× månedsinntekten din stående. Dette dekker de fleste uventede utgifter uten at du må ta opp lån eller bruke kredittkort.",
@@ -26,7 +26,7 @@ export const KATEGORIER: Kategori[] = [
   {
     id: "guiltFree",
     navn: "Guilt-free spending",
-    farge: "#b5916a",
+    farge: "oklch(0.65 0.14 70)",
     beskrivelse:
       "Penger du bruker uten dårlig samvittighet — kaffe, klær, hobbyer, uteliv.",
     forklaring:
@@ -38,7 +38,7 @@ export const KATEGORIER: Kategori[] = [
   {
     id: "ferie",
     navn: "Ferie",
-    farge: "#6ab5a5",
+    farge: "oklch(0.63 0.15 30)",
     beskrivelse:
       "Spare jevnlig til ferie i stedet for å bruke kredittkort i juni.",
     forklaring:
@@ -51,7 +51,7 @@ export const KATEGORIER: Kategori[] = [
   {
     id: "storeLivshendelser",
     navn: "Store livshendelser",
-    farge: "#8a6ab5",
+    farge: "oklch(0.53 0.19 295)",
     beskrivelse: "Bryllup, barn, bil, eller andre store utgifter.",
     forklaring:
       "Dette er pengene du sparer til ting som bryllup, barn, bil, eller andre større utgifter. Statistisk sett kommer mange til å gifte seg, få barn og kjøpe bil. Ved å sette av litt jevnlig slipper du å ta opp forbrukslån når livet skjer.",
@@ -64,7 +64,7 @@ export const KATEGORIER: Kategori[] = [
   {
     id: "pensjon",
     navn: "Pensjon",
-    farge: "#7ab56a",
+    farge: "oklch(0.62 0.15 140)",
     beskrivelse: "Langsiktig sparing du ikke rører før pensjonsalder.",
     forklaring:
       "Jobbpensjonen dekker sjelden nok – typisk 50–66% av lønna i pensjon. Egen sparing tetter gapet. Jo tidligere du starter, jo mer gjør renters rente for deg. Skattefordel: Du kan spare opptil 15 000 kr/år i individuell pensjonssparing (IPS) og få skattefradrag.",
