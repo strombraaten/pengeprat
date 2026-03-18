@@ -3,27 +3,21 @@ import { Sun, Moon } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 
 export function ModeToggle() {
-  const [theme, setTheme] = React.useState<"light" | "dark">("light")
+  const [, setTheme] = React.useState<"light" | "dark">("light")
 
-  // Hent nåværende tema fra DOM ved mount
+  // Sync React state to match what the inline <head> script already applied
   React.useEffect(() => {
     const isDark = document.documentElement.classList.contains("dark")
     setTheme(isDark ? "dark" : "light")
   }, [])
 
-  // Oppdater DOM og localStorage når tema endres
-  React.useEffect(() => {
-    const root = document.documentElement
-    if (theme === "dark") {
-      root.classList.add("dark")
-    } else {
-      root.classList.remove("dark")
-    }
-    localStorage.setItem("theme", theme)
-  }, [theme])
-
   function toggle() {
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"))
+    setTheme((prev) => {
+      const next = prev === "dark" ? "light" : "dark"
+      document.documentElement.classList[next === "dark" ? "add" : "remove"]("dark")
+      localStorage.setItem("theme", next)
+      return next
+    })
   }
 
   return (
