@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { ArrowRightIcon } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -59,7 +60,7 @@ export function Inngang({ onStart }: InngangProps) {
           </div>
 
           <Button onClick={handleSubmit} disabled={!gyldig} className="w-full">
-            Lag plan &rarr;
+            Lag plan <ArrowRightIcon data-icon="inline-end" />
           </Button>
 
           <p className="text-xs text-muted-foreground">
