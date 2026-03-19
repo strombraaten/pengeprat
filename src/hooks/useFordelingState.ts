@@ -70,13 +70,22 @@ export function useFordelingState() {
         const poster = structuredClone(prev.poster)
 
         const gammel = poster[postId].månedlig
-        const differanse = nyVerdi - gammel
-        poster[postId].månedlig = nyVerdi
-
-        // Fordel differansen likt på andre poster (unntatt fasteUtgifter)
         const andrePoster = (Object.keys(poster) as PostId[]).filter(
           (k) => k !== postId && k !== "fasteUtgifter"
         )
+
+        // Cap the new value so the slider can only take from other adjustable posts,
+        // never from fasteUtgifter (which represents real financial obligations).
+        const sumAndrePoster = andrePoster.reduce(
+          (s, k) => s + (poster[k].månedlig ?? 0),
+          0
+        )
+        const begrensetVerdi = Math.min(nyVerdi, gammel + sumAndrePoster)
+
+        const differanse = begrensetVerdi - gammel
+        poster[postId].månedlig = begrensetVerdi
+
+        // Fordel differansen likt på andre poster (unntatt fasteUtgifter)
         fordelLikt(differanse, andrePoster, poster, prev.lønn)
 
         return {
