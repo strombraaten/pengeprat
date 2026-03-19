@@ -85,18 +85,16 @@ export function FordelingDashboard({
 
         </div>
 
-        {/* ─── Side panel — hidden on mobile, CSS-animated on desktop ─── */}
-        {/* lg:flex ensures the panel container is in the flex row on desktop */}
-        <div className="hidden lg:flex">
-          <FordelingPanel
-            post={activePost}
-            lønn={lønn}
-            poster={poster}
-            onClose={() => setActivePost(null)}
-            onEndreMål={onEndreMål}
-            onEndreAlleredeSpart={onEndreAlleredeSpart}
-          />
-        </div>
+        {/* ─── Side panel — desktop sidebar + mobile bottom sheet ─── */}
+        {/* FordelingPanel handles both layouts internally */}
+        <FordelingPanel
+          post={activePost}
+          lønn={lønn}
+          poster={poster}
+          onClose={() => setActivePost(null)}
+          onEndreMål={onEndreMål}
+          onEndreAlleredeSpart={onEndreAlleredeSpart}
+        />
 
       </div>
     </TooltipProvider>
