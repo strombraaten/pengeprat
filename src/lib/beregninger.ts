@@ -111,6 +111,7 @@ export function omfordelEtterFasteUtgifter(
 
 // Fordeler differansen likt på valgte poster.
 // Kapper negative verdier på 0 – resten håndteres av justerTilTotal.
+// fasteUtgifter holdes utenfor justeringen siden den er en reell forpliktelse.
 export function fordelLikt(
   differanse: number,
   andrePoster: PostId[],
@@ -125,14 +126,15 @@ export function fordelLikt(
     poster[k].månedlig = Math.round(ny / 50) * 50
   })
 
-  justerTilTotal(lønn, poster)
+  justerTilTotal(lønn, poster, ["fasteUtgifter"])
 }
 
-// Justerer den største posten for å absorbere avrundingsfeil slik at
-// total alltid er lik lønn.
+// Justerer den største tillatte posten for å absorbere avrundingsfeil slik at
+// total alltid er lik lønn. excludeIds angir poster som ikke skal justeres.
 export function justerTilTotal(
   lønn: number,
-  poster: Record<PostId, PostState>
+  poster: Record<PostId, PostState>,
+  excludeIds: PostId[] = []
 ): void {
   const total = Object.values(poster).reduce(
     (s, p) => s + (p.månedlig ?? 0),
@@ -141,9 +143,11 @@ export function justerTilTotal(
   const diff = lønn - total
   if (diff === 0) return
 
-  const sortert = (Object.entries(poster) as [PostId, PostState][]).sort(
-    (a, b) => (b[1].månedlig ?? 0) - (a[1].månedlig ?? 0)
-  )
+  const sortert = (Object.entries(poster) as [PostId, PostState][])
+    .filter(([k]) => !excludeIds.includes(k as PostId))
+    .sort((a, b) => (b[1].månedlig ?? 0) - (a[1].månedlig ?? 0))
+
+  if (sortert.length === 0) return
   sortert[0][1].månedlig = (sortert[0][1].månedlig ?? 0) + diff
 }
 
