@@ -4,12 +4,12 @@ import type { PostId, PostState } from "@/types/fordeling"
 // Faste utgifter rundes til nærmeste 100 kr, resten til nærmeste 50 kr
 // – gjøres for at summene skal se "naturlige" ut for brukeren.
 const STANDARD_PROSENT: Record<PostId, number> = {
-  fasteUtgifter: 0.65,
-  buffer: 0.092,
-  guiltFree: 0.083,
-  ferie: 0.075,
-  storeLivshendelser: 0.058,
-  pensjon: 0.042,
+  fasteUtgifter: 0.75,
+  buffer: 0.066,
+  guiltFree: 0.059,
+  ferie: 0.054,
+  storeLivshendelser: 0.041,
+  pensjon: 0.030,
 }
 
 export function beregnStandardfordeling(
