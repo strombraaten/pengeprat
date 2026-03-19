@@ -80,7 +80,16 @@ export function FordelingBar({
                   aria-label={`${kat.navn} — ${Math.round(prosent)}%, ${formatKr(poster[kat.id]?.månedlig ?? 0)}/mnd`}
                 >
                   {visLabel && (
-                    <span className="text-[10px] font-semibold text-white/90 px-1 truncate">
+                    // Counter-scale the label so text stays the same visual
+                    // size even though the parent segment uses scale-y-[1.3]
+                    <span
+                      className={[
+                        "text-[10px] font-semibold text-white/90 px-1 truncate",
+                        erAktiv ? "scale-y-[0.769]" : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                    >
                       {Math.round(prosent)}%
                     </span>
                   )}
