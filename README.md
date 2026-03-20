@@ -41,8 +41,6 @@ npm install
 npm run dev
 ```
 
-Åpne [localhost:4321](http://localhost:4321).
-
 ## Hosting
 
 Hostet på Vercel via `simenlager.no/pengeprat`. Push til `main` → live på 1–2 minutter.
