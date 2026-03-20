@@ -1,0 +1,13 @@
+---
+import AppLayout from "@/layouts/app.astro"
+import { SparemaalApp } from "@/components/sparemaal/SparemaalApp"
+---
+
+<AppLayout
+  title="Hva er nok? — Pengeprat"
+  description="De fleste sparemål har et tak. Finn riktig sum for hvert mål — buffer, ferie, framtidsfri, store livshendelser og pensjon."
+>
+  <div class="mx-auto max-w-xl px-4 py-8 sm:px-6 sm:py-10">
+    <SparemaalApp client:load />
+  </div>
+</AppLayout>

@@ -23,8 +23,8 @@ import { ArrowRight } from "@phosphor-icons/react"
         <div class="space-y-2">
           <h1 class="text-3xl font-bold tracking-tight text-foreground">Pengeprat</h1>
           <p class="text-muted-foreground max-w-prose leading-relaxed">
-            Enkle verktøy som hjelper deg å ta grep om egen økonomi.
-            Ingen innlogging, ingen sporing.
+            Alle vil bare slippe å tenke på penger. Her er verktøyene du trenger
+            som gir deg akkurat den følelsen.
           </p>
         </div>
 
@@ -83,11 +83,37 @@ import { ArrowRight } from "@phosphor-icons/react"
             </div>
           </a>
 
+          <!-- Definer taket — aktiv -->
+          <a
+            href={`${import.meta.env.BASE_URL}/sparemaal`}
+            class="group flex flex-col gap-4 rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/30"
+          >
+            <div class="flex items-start justify-between">
+              <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                03
+              </span>
+              <span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                Tilgjengelig
+              </span>
+            </div>
+            <div class="space-y-1">
+              <h2 class="font-semibold text-foreground">Definer taket</h2>
+              <p class="text-sm text-muted-foreground leading-relaxed">
+                Sett en øvre grense for sparemålene dine, og finn ut når du faktisk
+                er ferdig spart.
+              </p>
+            </div>
+            <div class="flex items-center gap-1.5 text-sm font-medium text-primary mt-auto">
+              <span>Start</span>
+              <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+            </div>
+          </a>
+
           <!-- Fått inn en uventet sum — kommer snart -->
           <div class="flex flex-col gap-4 rounded-xl border border-border bg-card p-5 opacity-60">
             <div class="flex items-start justify-between">
               <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                03
+                04
               </span>
               <span class="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
                 Kommer snart
@@ -108,30 +134,34 @@ import { ArrowRight } from "@phosphor-icons/react"
         <div>
           <h2 class="scroll-m-20 border-b border-border pb-2 text-2xl font-semibold tracking-tight">Filosofien bak</h2>
           <p class="leading-7 mt-6 text-muted-foreground">
-            Penger er en av de vanligste kildene til frustrasjon. Både i
-            parforhold, men også i hverdagen til hver av oss. Det mange ønsker
-            seg er med andre ord økonomisk frihet. Dette handler mer om følelsen
-            av kontroll enn bare det å ha mest mulig penger. Og følelsen av
-            kontroll kan komme langt billigere enn du tror. Det handler om seks
-            punkt:
+            Penger er en av de vanligste kildene til frustrasjon. Hvor de fleste
+            av oss vil ha nok til å «ikke måtte tenke på det». Kall det
+            økonomisk frihet, om du vil.
+          </p>
+          <p class="leading-7 mt-4 text-muted-foreground">
+            Dette handler derimot mer om en følelse av kontroll og oversikt.
+            Ikke et ønske om å være rik. Du vil bare vite for din egen del at:
           </p>
           <ol class="my-6 ml-6 list-decimal [&>li]:mt-2 text-muted-foreground">
-            <li>Du kan dekke en uforutsett utgift eller fler (buffer)</li>
+            <li>Du kan dekke en uforutsett utgift, eller fler (buffer)</li>
+            <li>Du kan kose deg innen rimelighetens grenser («guilt-free spending», som jeg kaller det)</li>
+            <li>Du kan si ja til sosiale- og spontane forespørsler uten å tenke deg om (ferie og opplevelser)</li>
             <li>Framtids-deg er tatt hånd om (pensjon)</li>
-            <li>Du kan si ja til sosiale og spontane forespørsler uten å tenke deg om (ferie og opplevelser)</li>
-            <li>Du kan kose deg innen rimelighetens grenser (guilt-free spending)</li>
             <li>Du tenker langsiktig (bil, bryllup, hus og så videre)</li>
-            <li>Du tillater deg selv å drømme (frihetsfond)</li>
+            <li>Du kan tillate deg selv å drømme (frihetsfond)</li>
           </ol>
           <p class="leading-7 text-muted-foreground">
-            Disse seks punktene gjenspeiles i sparemålene og et månedlig
-            budsjett. Men når jeg sier budsjett, er ikke det noe stort og
-            omfattende, for det meste går av seg selv. Budsjettet ditt er nemlig
-            lønn minus faste utgifter minus guilt-free spending, er lik penger
-            til sparing. Og all sparing kan settes opp som faste, automatiske
-            trekk som går ut av lønningskontoen din, en til to dager etter lønna
-            kommer inn. Da sitter du igjen med det du trenger for å betale
-            regningene (faste utgifter), men også til å leve og kose deg.
+            Du trenger ikke nå alle sparemålene dine. Det eneste du trenger er
+            å vite at du tar smarte valg hver måned når lønna kommer inn på
+            kontoen. Og at du har en overordnet plan.
+          </p>
+          <p class="leading-7 mt-4 text-muted-foreground">
+            Planen får du ved å ta en slags pengeprat med deg selv. Skaff deg
+            en <a href={`${import.meta.env.BASE_URL}/utgifter`} class="underline decoration-muted-foreground/40 hover:text-foreground hover:decoration-foreground transition-colors">oversikt over dine faste utgifter</a>. Se over hva du har spart opp
+            fra før. <a href={`${import.meta.env.BASE_URL}/fordeling`} class="underline decoration-muted-foreground/40 hover:text-foreground hover:decoration-foreground transition-colors">Fordel pengene</a> utover spareområdene. Sett opp faste trekk
+            fra lønningskontoen som går automatisk hver måned. Og kjenn på
+            følelsen av at du har kontroll, uavhengig av hvor mye du faktisk
+            tjener.
           </p>
         </div>
 
