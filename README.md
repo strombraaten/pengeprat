@@ -34,13 +34,3 @@ Du trenger ikke nå alle sparemålene dine. Det eneste du trenger er å vite at 
 - [shadcn/ui](https://ui.shadcn.com)
 - localStorage for all persistence — ingen backend
 
-## Utvikling
-
-```sh
-npm install
-npm run dev
-```
-
-## Hosting
-
-Hostet på Vercel via `simenlager.no/pengeprat`. Push til `main` → live på 1–2 minutter.
