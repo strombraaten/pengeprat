@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
 import { Separator } from "@/components/ui/separator"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 import { formatKr } from "@/lib/formatering"
 import { useUventetSumState } from "@/hooks/useUventetSumState"
 import type { UventetSumKategori } from "@/types/uventet-sum"
@@ -349,8 +349,8 @@ export function UventetSumApp() {
           {ufordeltKr > 0 && (
             <Alert>
               <WarningIcon size={16} />
+              <AlertTitle>{formatKr(ufordeltKr)} er ikke fordelt ennå.</AlertTitle>
               <AlertDescription>
-                <span className="font-semibold">{formatKr(ufordeltKr)}</span> er ikke fordelt ennå.
                 Lås opp en kategori eller juster en slider for å fordele resten.
               </AlertDescription>
             </Alert>
