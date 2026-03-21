@@ -64,17 +64,6 @@ function FordelingsBar({ kategorier }: FordelingsBarProps) {
 }
 
 // ---------------------------------------------------------------------------
-// Slider step — adapts to the total amount so kr increments feel natural
-// ---------------------------------------------------------------------------
-
-function sliderStep(beløp: number): number {
-  if (beløp <= 10_000) return 100
-  if (beløp <= 50_000) return 500
-  if (beløp <= 200_000) return 1_000
-  return 5_000
-}
-
-// ---------------------------------------------------------------------------
 // Category row
 // ---------------------------------------------------------------------------
 
@@ -99,7 +88,7 @@ function KategoriRad({
 }: KategoriRadProps) {
   const harBeløp = beløp > 0
   const krVerdi = Math.round(beløp * kategori.prosent / 100)
-  const step = harBeløp ? sliderStep(beløp) : 1
+  // step=1 so the slider can hit any exact kr value; precision typing is available via click-to-edit
 
   // Inline editing of the kr value — clicking the number opens a text input
   const [redigerer, setRedigerer] = useState(false)
@@ -186,7 +175,9 @@ function KategoriRad({
             onChange={(e) => setDraft(e.target.value)}
             onBlur={commitRedigering}
             onKeyDown={(e) => {
-              if (e.key === "Enter") { commitRedigering(); e.currentTarget.blur() }
+              // Trigger blur on Enter so onBlur handles the single commit path —
+              // avoids double-calling commitRedigering (which would re-redistribute)
+              if (e.key === "Enter") e.currentTarget.blur()
               if (e.key === "Escape") setRedigerer(false)
             }}
             className="w-36 bg-transparent text-xl font-bold tabular-nums text-foreground outline-none border-b-2 border-primary"
@@ -214,7 +205,7 @@ function KategoriRad({
         value={[harBeløp ? krVerdi : kategori.prosent]}
         min={0}
         max={harBeløp ? beløp : 100}
-        step={step}
+        step={1}
         onValueChange={([v]) => handleSliderChange(v)}
         aria-label={`Fordeling for ${kategori.navn || "kategori"}`}
       />
