@@ -109,24 +109,32 @@ import { ArrowRight } from "@phosphor-icons/react"
             </div>
           </a>
 
-          <!-- Fått inn en uventet sum — kommer snart -->
-          <div class="flex flex-col gap-4 rounded-xl border border-border bg-card p-5 opacity-60">
+          <!-- Uventet sum — aktiv -->
+          <a
+            href={`${import.meta.env.BASE_URL}/uventet-sum`}
+            class="group flex flex-col gap-4 rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/30"
+          >
             <div class="flex items-start justify-between">
               <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 04
               </span>
-              <span class="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-                Kommer snart
+              <span class="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                Tilgjengelig
               </span>
             </div>
             <div class="space-y-1">
               <h2 class="font-semibold text-foreground">Fått inn en uventet sum?</h2>
               <p class="text-sm text-muted-foreground leading-relaxed">
-                Få intelligente forslag basert på dine sparemål og økonomi når du
-                mottar en bonus, arvemidler eller annen uventet inntekt.
+                Fordel en bonus, arvemidler eller annen uventet inntekt mellom
+                sparing, nytelse og framtid — med smarte slidere som låser seg
+                automatisk.
               </p>
             </div>
-          </div>
+            <div class="flex items-center gap-1.5 text-sm font-medium text-primary mt-auto">
+              <span>Start</span>
+              <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+            </div>
+          </a>
 
         </div>
 
