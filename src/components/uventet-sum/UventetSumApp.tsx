@@ -1,9 +1,10 @@
 import { useRef, useState } from "react"
-import { ArrowCounterClockwiseIcon, ArrowRightIcon, LockOpenIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react"
+import { ArrowCounterClockwiseIcon, ArrowRightIcon, LockOpenIcon, PlusIcon, TrashIcon, WarningIcon } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
 import { Separator } from "@/components/ui/separator"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { formatKr } from "@/lib/formatering"
 import { useUventetSumState } from "@/hooks/useUventetSumState"
 import type { UventetSumKategori } from "@/types/uventet-sum"
@@ -30,10 +31,13 @@ function FordelingsBar({ kategorier }: FordelingsBarProps) {
   const synlige = kategorier.filter((k) => k.prosent > 0)
 
   return (
+    // The bar is always full-width. Colored segments take their share,
+    // and the grey remainder segment (flex-1) fills whatever is left —
+    // this works for all cases: fully allocated, partially allocated, and
+    // float over-allocation (flex naturally clamps the remainder to 0).
     <div className="flex h-7 w-full overflow-hidden rounded-lg">
       {synlige.map((k, i) => {
         const erFørste = i === 0
-        const erSiste = i === synlige.length - 1
         // Round only for display — internal prosent stays float for kr precision
         const prosDisplay = Math.round(k.prosent)
         const visLabel = k.prosent >= 8
@@ -45,11 +49,7 @@ function FordelingsBar({ kategorier }: FordelingsBarProps) {
             style={{
               width: `${k.prosent}%`,
               backgroundColor: k.farge,
-              borderRadius: erFørste
-                ? "0.5rem 0 0 0.5rem"
-                : erSiste
-                  ? "0 0.5rem 0.5rem 0"
-                  : undefined,
+              borderRadius: erFørste ? "0.5rem 0 0 0.5rem" : undefined,
             }}
             title={`${k.navn || "Uten navn"} — ${prosDisplay}%`}
           >
@@ -61,6 +61,16 @@ function FordelingsBar({ kategorier }: FordelingsBarProps) {
           </div>
         )
       })}
+
+      {/* Grey remainder — flex-1 so it always fills the remaining width,
+          whether that's 5% (many unallocated kr) or ~0% (fully allocated).
+          Right corners always rounded here since this is always the last segment. */}
+      <div
+        className="flex-1 bg-muted transition-all duration-200"
+        style={{
+          borderRadius: synlige.length === 0 ? "0.5rem" : "0 0.5rem 0.5rem 0",
+        }}
+      />
     </div>
   )
 }
@@ -246,6 +256,14 @@ export function UventetSumApp() {
 
   const harBeløp = state.beløp > 0
 
+  // Kr remaining after all categories are allocated. Uses Math.round per category so
+  // the result matches what the user sees in the summary (same rounding as display).
+  const fordeltKr = state.kategorier.reduce(
+    (s, k) => s + Math.round(state.beløp * k.prosent / 100),
+    0
+  )
+  const ufordeltKr = state.beløp - fordeltKr
+
   function commitBeløp(raw: string) {
     const parsed = parseBeløp(raw)
     setBeløp(parsed)
@@ -327,6 +345,17 @@ export function UventetSumApp() {
             </Button>
           </div>
 
+          {/* Alert: shown only when there are unallocated kr */}
+          {ufordeltKr > 0 && (
+            <Alert>
+              <WarningIcon size={16} />
+              <AlertDescription>
+                <span className="font-semibold">{formatKr(ufordeltKr)}</span> er ikke fordelt ennå.
+                Lås opp en kategori eller juster en slider for å fordele resten.
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Category sliders */}
           <div className="space-y-6">
             {state.kategorier.map((kat) => (
@@ -382,6 +411,18 @@ export function UventetSumApp() {
                   </div>
                 ))}
             </div>
+            {/* Unallocated row — only shown when kr remain */}
+            {ufordeltKr > 0 && (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="h-2.5 w-2.5 shrink-0 rounded-full bg-muted-foreground/30" aria-hidden />
+                  <span className="text-muted-foreground">Ikke fordelt</span>
+                </div>
+                <span className="tabular-nums text-sm font-medium text-muted-foreground">
+                  {formatKr(ufordeltKr)}
+                </span>
+              </div>
+            )}
             <Separator />
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold">Totalt</span>
