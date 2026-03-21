@@ -25,10 +25,12 @@ function parseBeløp(str: string): number {
 
 interface FordelingsBarProps {
   kategorier: UventetSumKategori[]
+  ufordeltKr: number
 }
 
-function FordelingsBar({ kategorier }: FordelingsBarProps) {
+function FordelingsBar({ kategorier, ufordeltKr }: FordelingsBarProps) {
   const synlige = kategorier.filter((k) => k.prosent > 0)
+  const ufordeltProsent = 100 - kategorier.reduce((s, k) => s + k.prosent, 0)
 
   return (
     // The bar is always full-width. Colored segments take their share,
@@ -62,15 +64,27 @@ function FordelingsBar({ kategorier }: FordelingsBarProps) {
         )
       })}
 
-      {/* Grey remainder — flex-1 so it always fills the remaining width,
-          whether that's 5% (many unallocated kr) or ~0% (fully allocated).
-          Right corners always rounded here since this is always the last segment. */}
+      {/* Grey remainder — flex-1 so it always fills the remaining width.
+          Label rules: >= 25% segment AND sm: breakpoint → full text;
+          >= 5% segment → "?" (fits a single char); < 5% → no label. */}
       <div
-        className="flex-1 bg-muted transition-all duration-200"
+        className="flex-1 flex items-center justify-center overflow-hidden bg-muted transition-all duration-200"
         style={{
           borderRadius: synlige.length === 0 ? "0.5rem" : "0 0.5rem 0.5rem 0",
         }}
-      />
+        title={ufordeltKr > 0 ? `${formatKr(ufordeltKr)} gjenstår` : undefined}
+      >
+        {ufordeltProsent >= 5 && (
+          <span className="truncate px-1 text-[10px] font-semibold text-foreground/50">
+            {/* Full text: only when segment is wide (>= 25%) AND screen is sm+ */}
+            {ufordeltProsent >= 25 && (
+              <span className="hidden sm:inline">{formatKr(ufordeltKr)} gjenstår</span>
+            )}
+            {/* Question mark: fallback when full text is hidden */}
+            <span className={ufordeltProsent >= 25 ? "sm:hidden" : ""}>?</span>
+          </span>
+        )}
+      </div>
     </div>
   )
 }
@@ -333,7 +347,7 @@ export function UventetSumApp() {
           {/* Distribution bar + reset — reset lives here so it's close to
               the thing it affects and doesn't require scrolling past all sliders */}
           <div className="space-y-2">
-            <FordelingsBar kategorier={state.kategorier} />
+            <FordelingsBar kategorier={state.kategorier} ufordeltKr={ufordeltKr} />
             <Button
               variant="outline"
               size="sm"
