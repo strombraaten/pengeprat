@@ -34,8 +34,11 @@ function normaliserProsenter(
     if (k.id === endretId) return { ...k, prosent: faktiskProsent, locked: true }
     if (k.locked) return k
     if (frie.length === 0) return k
-    if (friTotal === 0) return { ...k, prosent: Math.round(gjenværende / frie.length) }
-    return { ...k, prosent: Math.round(gjenværende * (k.prosent / friTotal)) }
+    // Keep prosent as float — rounding to integer here causes kr snap-to-340 jumps
+    // (for e.g. 34 000 kr, 1% = 340 kr, so integer prosent = 340 kr minimum step).
+    // Display code rounds for labels; Math.round(beløp * prosent / 100) recovers exact kr.
+    if (friTotal === 0) return { ...k, prosent: gjenværende / frie.length }
+    return { ...k, prosent: gjenværende * (k.prosent / friTotal) }
   })
 }
 

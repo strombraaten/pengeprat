@@ -34,6 +34,8 @@ function FordelingsBar({ kategorier }: FordelingsBarProps) {
       {synlige.map((k, i) => {
         const erFørste = i === 0
         const erSiste = i === synlige.length - 1
+        // Round only for display — internal prosent stays float for kr precision
+        const prosDisplay = Math.round(k.prosent)
         const visLabel = k.prosent >= 8
 
         return (
@@ -49,11 +51,11 @@ function FordelingsBar({ kategorier }: FordelingsBarProps) {
                   ? "0 0.5rem 0.5rem 0"
                   : undefined,
             }}
-            title={`${k.navn || "Uten navn"} — ${k.prosent}%`}
+            title={`${k.navn || "Uten navn"} — ${prosDisplay}%`}
           >
             {visLabel && (
               <span className="truncate px-1 text-[10px] font-semibold text-white/90">
-                {k.prosent}%
+                {prosDisplay}%
               </span>
             )}
           </div>
@@ -106,16 +108,18 @@ function KategoriRad({
   function commitRedigering() {
     const parsed = parseInt(draft.replace(/\s/g, "").replace(/,/g, ""), 10)
     if (!isNaN(parsed) && parsed >= 0 && beløp > 0) {
-      const nyProsent = Math.round(Math.min(parsed, beløp) / beløp * 100)
+      const nyProsent = Math.min(parsed, beløp) / beløp * 100
       onEndreProsent(kategori.id, nyProsent)
     }
     setRedigerer(false)
   }
 
-  // Convert a kr slider value to the nearest percent and dispatch
+  // Convert a kr slider value to a float percent and dispatch.
+  // Keeping full float precision means Math.round(beløp * prosent / 100)
+  // recovers the exact dragged kr value rather than snapping to beløp/100 steps.
   function handleSliderChange(krNy: number) {
     if (harBeløp) {
-      onEndreProsent(kategori.id, Math.round(krNy / beløp * 100))
+      onEndreProsent(kategori.id, krNy / beløp * 100)
     } else {
       onEndreProsent(kategori.id, krNy)
     }
