@@ -20,8 +20,8 @@ export const DEFAULT_KATEGORIER: UventetSumKategori[] = [
   { id: "guiltFree",          navn: "Guilt-free spending", prosent: 15, locked: false, farge: FARGER[1] },
   { id: "ferie",              navn: "Ferie",               prosent: 15, locked: false, farge: FARGER[2] },
   { id: "storeLivshendelser", navn: "Store livshendelser", prosent: 15, locked: false, farge: FARGER[3] },
-  { id: "pensjon",            navn: "Pensjon",             prosent: 15, locked: false, farge: FARGER[4] },
   { id: "framtidsfri",        navn: "Framtidsfri",         prosent: 20, locked: false, farge: FARGER[5] },
+  { id: "pensjon",            navn: "Pensjon",             prosent: 15, locked: false, farge: FARGER[4] },
 ]
 
 export function nyttFargeFraPaletten(antallEksisterende: number): string {

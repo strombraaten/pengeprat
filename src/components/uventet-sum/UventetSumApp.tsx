@@ -1,5 +1,5 @@
 import { useRef, useState } from "react"
-import { ArrowRightIcon, LockOpenIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react"
+import { ArrowCounterClockwiseIcon, ArrowRightIcon, LockOpenIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
@@ -275,41 +275,34 @@ export function UventetSumApp() {
       </div>
 
       {/* Amount input */}
-      <div className="mb-8 space-y-3">
+      <div className="mb-8 space-y-2">
         <label htmlFor="beløp-input" className="text-sm font-medium">
           Hvor mye har du fått?
         </label>
-        <div className="relative max-w-xs">
-          <Input
-            id="beløp-input"
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            placeholder="f.eks. 50 000"
-            autoComplete="off"
-            value={beløpDraft}
-            onChange={(e) => setBeløpDraft(e.target.value)}
-            onBlur={(e) => {
-              // Only auto-commit on blur when the distribution is already
-              // visible — so typing an amount and tabbing away doesn't
-              // skip the confirmation button on first visit
-              if (harBeløp) commitBeløp(e.target.value)
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                commitBeløp(beløpDraft)
-                ;(e.target as HTMLInputElement).blur()
-              }
-            }}
-            className="pr-10"
-          />
-          <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm text-muted-foreground">
-            kr
-          </span>
-        </div>
-
-        {/* Primary CTA — only shown before the first amount is confirmed */}
-        {!harBeløp && (
+        {/* Input + button inline — button stays visible for re-running with a new amount */}
+        <div className="flex items-center gap-2">
+          <div className="relative w-40 sm:w-48">
+            <Input
+              id="beløp-input"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              placeholder="f.eks. 50 000"
+              autoComplete="off"
+              value={beløpDraft}
+              onChange={(e) => setBeløpDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  commitBeløp(beløpDraft)
+                  ;(e.target as HTMLInputElement).blur()
+                }
+              }}
+              className="pr-10"
+            />
+            <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm text-muted-foreground">
+              kr
+            </span>
+          </div>
           <Button
             onClick={() => commitBeløp(beløpDraft)}
             disabled={parseBeløp(beløpDraft) === 0}
@@ -317,7 +310,7 @@ export function UventetSumApp() {
             Se fordeling
             <ArrowRightIcon data-icon="inline-end" />
           </Button>
-        )}
+        </div>
       </div>
 
       {/* Distribution section — only visible once an amount is entered */}
@@ -328,16 +321,15 @@ export function UventetSumApp() {
               the thing it affects and doesn't require scrolling past all sliders */}
           <div className="space-y-2">
             <FordelingsBar kategorier={state.kategorier} />
-            <div className="flex justify-end">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={nullstillFordeling}
-                className="h-6 px-2 text-xs text-muted-foreground"
-              >
-                Nullstill fordeling
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={nullstillFordeling}
+              className="gap-1.5"
+            >
+              <ArrowCounterClockwiseIcon size={13} />
+              Tilbakestill fordeling
+            </Button>
           </div>
 
           {/* Category sliders */}
