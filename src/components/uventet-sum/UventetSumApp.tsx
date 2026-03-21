@@ -324,8 +324,21 @@ export function UventetSumApp() {
       {harBeløp && (
         <div className="space-y-8">
 
-          {/* Distribution bar */}
-          <FordelingsBar kategorier={state.kategorier} />
+          {/* Distribution bar + reset — reset lives here so it's close to
+              the thing it affects and doesn't require scrolling past all sliders */}
+          <div className="space-y-2">
+            <FordelingsBar kategorier={state.kategorier} />
+            <div className="flex justify-end">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={nullstillFordeling}
+                className="h-6 px-2 text-xs text-muted-foreground"
+              >
+                Nullstill fordeling
+              </Button>
+            </div>
+          </div>
 
           {/* Category sliders */}
           <div className="space-y-6">
@@ -353,14 +366,6 @@ export function UventetSumApp() {
             >
               <PlusIcon size={14} />
               Legg til kategori
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={nullstillFordeling}
-              className="text-muted-foreground"
-            >
-              Nullstill fordeling
             </Button>
           </div>
 
