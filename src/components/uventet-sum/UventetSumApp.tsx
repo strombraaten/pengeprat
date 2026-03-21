@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { LockOpenIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -64,6 +64,17 @@ function FordelingsBar({ kategorier }: FordelingsBarProps) {
 }
 
 // ---------------------------------------------------------------------------
+// Slider step — adapts to the total amount so kr increments feel natural
+// ---------------------------------------------------------------------------
+
+function sliderStep(beløp: number): number {
+  if (beløp <= 10_000) return 100
+  if (beløp <= 50_000) return 500
+  if (beløp <= 200_000) return 1_000
+  return 5_000
+}
+
+// ---------------------------------------------------------------------------
 // Category row
 // ---------------------------------------------------------------------------
 
@@ -88,6 +99,38 @@ function KategoriRad({
 }: KategoriRadProps) {
   const harBeløp = beløp > 0
   const krVerdi = Math.round(beløp * kategori.prosent / 100)
+  const step = harBeløp ? sliderStep(beløp) : 1
+
+  // Inline editing of the kr value — clicking the number opens a text input
+  const [redigerer, setRedigerer] = useState(false)
+  const [draft, setDraft] = useState("")
+  const redigerInputRef = useRef<HTMLInputElement>(null)
+
+  function startRedigering() {
+    if (!harBeløp) return
+    setDraft(String(krVerdi))
+    setRedigerer(true)
+    // Let the input mount before selecting its content
+    setTimeout(() => redigerInputRef.current?.select(), 0)
+  }
+
+  function commitRedigering() {
+    const parsed = parseInt(draft.replace(/\s/g, "").replace(/,/g, ""), 10)
+    if (!isNaN(parsed) && parsed >= 0 && beløp > 0) {
+      const nyProsent = Math.round(Math.min(parsed, beløp) / beløp * 100)
+      onEndreProsent(kategori.id, nyProsent)
+    }
+    setRedigerer(false)
+  }
+
+  // Convert a kr slider value to the nearest percent and dispatch
+  function handleSliderChange(krNy: number) {
+    if (harBeløp) {
+      onEndreProsent(kategori.id, Math.round(krNy / beløp * 100))
+    } else {
+      onEndreProsent(kategori.id, krNy)
+    }
+  }
 
   return (
     <div className="space-y-2">
@@ -132,18 +175,47 @@ function KategoriRad({
         </div>
       </div>
 
-      {/* Value display */}
-      <div className="text-xl font-bold tabular-nums">
-        {harBeløp ? formatKr(krVerdi) : `${kategori.prosent}%`}
-      </div>
+      {/* Editable value — click to type an exact kr amount */}
+      {redigerer ? (
+        <div className="relative inline-flex items-baseline gap-1">
+          <input
+            ref={redigerInputRef}
+            type="text"
+            inputMode="numeric"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={commitRedigering}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") { commitRedigering(); e.currentTarget.blur() }
+              if (e.key === "Escape") setRedigerer(false)
+            }}
+            className="w-36 bg-transparent text-xl font-bold tabular-nums text-foreground outline-none border-b-2 border-primary"
+            aria-label={`Beløp for ${kategori.navn || "kategori"}`}
+          />
+          <span className="text-sm text-muted-foreground">kr</span>
+        </div>
+      ) : (
+        <button
+          onClick={harBeløp ? startRedigering : undefined}
+          className={[
+            "text-xl font-bold tabular-nums text-left",
+            harBeløp
+              ? "cursor-text text-foreground hover:text-primary transition-colors"
+              : "cursor-default text-foreground",
+          ].join(" ")}
+          title={harBeløp ? "Klikk for å skrive inn et eksakt beløp" : undefined}
+        >
+          {harBeløp ? formatKr(krVerdi) : `${kategori.prosent}%`}
+        </button>
+      )}
 
-      {/* Slider */}
+      {/* Kr-based slider (step adapts to amount for clean increments) */}
       <Slider
-        value={[kategori.prosent]}
+        value={[harBeløp ? krVerdi : kategori.prosent]}
         min={0}
-        max={100}
-        step={1}
-        onValueChange={([v]) => onEndreProsent(kategori.id, v)}
+        max={harBeløp ? beløp : 100}
+        step={step}
+        onValueChange={([v]) => handleSliderChange(v)}
         aria-label={`Fordeling for ${kategori.navn || "kategori"}`}
       />
 
