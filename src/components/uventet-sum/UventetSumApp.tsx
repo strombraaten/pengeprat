@@ -1,5 +1,5 @@
 import { useRef, useState } from "react"
-import { LockOpenIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react"
+import { ArrowRightIcon, LockOpenIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
@@ -275,7 +275,7 @@ export function UventetSumApp() {
       </div>
 
       {/* Amount input */}
-      <div className="mb-8 space-y-2">
+      <div className="mb-8 space-y-3">
         <label htmlFor="beløp-input" className="text-sm font-medium">
           Hvor mye har du fått?
         </label>
@@ -289,7 +289,12 @@ export function UventetSumApp() {
             autoComplete="off"
             value={beløpDraft}
             onChange={(e) => setBeløpDraft(e.target.value)}
-            onBlur={(e) => commitBeløp(e.target.value)}
+            onBlur={(e) => {
+              // Only auto-commit on blur when the distribution is already
+              // visible — so typing an amount and tabbing away doesn't
+              // skip the confirmation button on first visit
+              if (harBeløp) commitBeløp(e.target.value)
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 commitBeløp(beløpDraft)
@@ -302,6 +307,17 @@ export function UventetSumApp() {
             kr
           </span>
         </div>
+
+        {/* Primary CTA — only shown before the first amount is confirmed */}
+        {!harBeløp && (
+          <Button
+            onClick={() => commitBeløp(beløpDraft)}
+            disabled={parseBeløp(beløpDraft) === 0}
+          >
+            Se fordeling
+            <ArrowRightIcon data-icon="inline-end" />
+          </Button>
+        )}
       </div>
 
       {/* Distribution section — only visible once an amount is entered */}
