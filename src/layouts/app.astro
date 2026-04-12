@@ -14,13 +14,11 @@ const {
 
 const pathname = Astro.url.pathname
 
-const base = import.meta.env.BASE_URL
-
 const verktøy = [
-  { href: `${base}/fordeling`, label: "Fordeling" },
-  { href: `${base}/utgifter`, label: "Utgifter" },
-  { href: `${base}/sparemaal`, label: "Definer taket" },
-  { href: `${base}/uventet-sum`, label: "Uventet sum" },
+  { href: "/fordeling", label: "Fordeling" },
+  { href: "/utgifter", label: "Utgifter" },
+  { href: "/sparemaal", label: "Definer taket" },
+  { href: "/uventet-sum", label: "Uventet sum" },
 ]
 
 function erAktiv(href: string) {
@@ -33,7 +31,7 @@ function erAktiv(href: string) {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
-    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}/favicon.svg`} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
     <script is:inline>
       const getThemePreference = () => {
@@ -52,7 +50,7 @@ function erAktiv(href: string) {
     <header class="sticky top-0 z-10 border-b border-border bg-card">
       <div class="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
         <a
-          href={import.meta.env.BASE_URL}
+          href="/"
           class="text-sm font-semibold tracking-tight text-foreground hover:text-primary transition-colors"
         >
           Pengeprat

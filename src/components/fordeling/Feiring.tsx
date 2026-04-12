@@ -39,7 +39,7 @@ export function Feiring({ onTilbakeTilPlan }: FeiringProps) {
             <ArrowLeftIcon data-icon="inline-start" /> Tilbake til planen
           </Button>
           <Button asChild className="w-full">
-            <a href={import.meta.env.BASE_URL}>Gå til alle verktøyene</a>
+            <a href="/">Gå til alle verktøyene</a>
           </Button>
         </div>
 
