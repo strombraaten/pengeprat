@@ -33,7 +33,7 @@ import { ArrowRight } from "@phosphor-icons/react"
 
           <!-- Månedlige utgifter — aktiv -->
           <a
-            href={`${import.meta.env.BASE_URL}/utgifter`}
+            href={"/utgifter"}
             class="group flex flex-col gap-4 rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/30"
           >
             <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -54,7 +54,7 @@ import { ArrowRight } from "@phosphor-icons/react"
 
           <!-- Fordeling — aktiv -->
           <a
-            href={`${import.meta.env.BASE_URL}/fordeling`}
+            href={"/fordeling"}
             class="group flex flex-col gap-4 rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/30"
           >
             <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -75,7 +75,7 @@ import { ArrowRight } from "@phosphor-icons/react"
 
           <!-- Definer taket — aktiv -->
           <a
-            href={`${import.meta.env.BASE_URL}/sparemaal`}
+            href={"/sparemaal"}
             class="group flex flex-col gap-4 rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/30"
           >
             <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -96,7 +96,7 @@ import { ArrowRight } from "@phosphor-icons/react"
 
           <!-- Uventet sum — aktiv -->
           <a
-            href={`${import.meta.env.BASE_URL}/uventet-sum`}
+            href={"/uventet-sum"}
             class="group flex flex-col gap-4 rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/30"
           >
             <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -145,8 +145,8 @@ import { ArrowRight } from "@phosphor-icons/react"
           </p>
           <p class="leading-7 mt-4 text-muted-foreground">
             Planen får du ved å ta en slags pengeprat med deg selv. Skaff deg
-            en <a href={`${import.meta.env.BASE_URL}/utgifter`} class="underline decoration-muted-foreground/40 hover:text-foreground hover:decoration-foreground transition-colors">oversikt over dine faste utgifter</a>. Se over hva du har spart opp
-            fra før. <a href={`${import.meta.env.BASE_URL}/fordeling`} class="underline decoration-muted-foreground/40 hover:text-foreground hover:decoration-foreground transition-colors">Fordel pengene</a> utover spareområdene. Sett opp faste trekk
+            en <a href={"/utgifter"} class="underline decoration-muted-foreground/40 hover:text-foreground hover:decoration-foreground transition-colors">oversikt over dine faste utgifter</a>. Se over hva du har spart opp
+            fra før. <a href={"/fordeling"} class="underline decoration-muted-foreground/40 hover:text-foreground hover:decoration-foreground transition-colors">Fordel pengene</a> utover spareområdene. Sett opp faste trekk
             fra lønningskontoen som går automatisk hver måned. Og kjenn på
             følelsen av at du har kontroll, uavhengig av hvor mye du faktisk
             tjener.
