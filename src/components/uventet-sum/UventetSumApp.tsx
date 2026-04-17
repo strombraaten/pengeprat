@@ -277,8 +277,10 @@ export function UventetSumApp() {
           Fått inn en uventet sum?
         </h1>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Fordel beløpet mellom kategorier. Dra en slider for å velge hvor mye som
-          går til hvert formål — totalen kan ikke overgå det du har fått inn.
+          Her har du en mulighet til å gjøre framtids-deg en tjeneste. Ikke vent
+          til pengene nesten er brukt opp før du setter av noe til sparing. Start
+          her med å velge hvor mye som skal gå til hvert formål, og sett av en
+          dedikert sum til hygge (også kjent som guiltfree spending).
         </p>
       </div>
 
