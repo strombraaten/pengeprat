@@ -321,7 +321,7 @@ export function UventetSumApp() {
           </Button>
         </div>
         <p className="text-xs text-muted-foreground">
-          Vi avrunder til nærmeste 100 kr for ryddigere beløp.
+          For enkelhets skyld runder vi av summen til nærmeste hundre kroner.
         </p>
       </div>
 
