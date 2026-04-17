@@ -422,7 +422,7 @@ export function UventetSumApp() {
 
           {/* Privacy notice */}
           <p className="text-xs text-muted-foreground/70">
-            Dataene dine lagres kun lokalt i nettleseren din. Ingenting sendes til noen server.
+            Tallene lagres ikke eksternt hos noen store, shady selskaper. Det lagres bare lokalt der du ser på nettsida.
           </p>
         </div>
       )}
