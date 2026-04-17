@@ -18,7 +18,7 @@ export const UtgifterHeader: React.FC<UtgifterHeaderProps> = ({ categories }) =>
         </div>
         <div className="text-right">
           <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Total per måned
+            Totalt per måned
           </div>
           <div className="text-3xl font-bold text-foreground">{formatKr(total)}</div>
         </div>
