@@ -125,7 +125,6 @@ function TilgjengeligDisplay({ tilgjengeligKr, beløp }: TilgjengeligDisplayProp
 interface KategoriRadProps {
   kategori: UventetSumKategori
   beløp: number
-  tilgjengeligKr: number
   onEndreKr: (id: string, kr: number) => void
   onEndreNavn: (id: string, navn: string) => void
   onFjern: (id: string) => void
@@ -135,7 +134,6 @@ interface KategoriRadProps {
 function KategoriRad({
   kategori,
   beløp,
-  tilgjengeligKr,
   onEndreKr,
   onEndreNavn,
   onFjern,
@@ -158,9 +156,6 @@ function KategoriRad({
     }
     setRedigerer(false)
   }
-
-  // Max this slider can reach: current allocation + what's still free
-  const sliderMax = Math.max(kategori.kr + tilgjengeligKr, kategori.kr)
 
   return (
     <div className="space-y-2">
@@ -221,11 +216,10 @@ function KategoriRad({
         </button>
       )}
 
-      {/* Slider — step=100 for clean increments, max capped at what's available */}
       <Slider
         value={[kategori.kr]}
         min={0}
-        max={sliderMax || beløp}
+        max={beløp}
         step={100}
         onValueChange={([v]) => onEndreKr(kategori.id, v)}
         aria-label={`Fordeling for ${kategori.navn || "kategori"}`}
@@ -361,7 +355,6 @@ export function UventetSumApp() {
                 key={kat.id}
                 kategori={kat}
                 beløp={state.beløp}
-                tilgjengeligKr={tilgjengeligKr}
                 onEndreKr={endreKr}
                 onEndreNavn={endreNavn}
                 onFjern={fjernKategori}
