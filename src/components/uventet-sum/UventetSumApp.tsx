@@ -1,16 +1,15 @@
 import { useRef, useState } from "react"
-import { ArrowCounterClockwiseIcon, ArrowRightIcon, LockOpenIcon, PlusIcon, TrashIcon, WarningIcon } from "@phosphor-icons/react"
+import { ArrowCounterClockwiseIcon, ArrowRightIcon, CheckCircle, PlusIcon, TrashIcon } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
 import { Separator } from "@/components/ui/separator"
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 import { formatKr } from "@/lib/formatering"
 import { useUventetSumState } from "@/hooks/useUventetSumState"
 import type { UventetSumKategori } from "@/types/uventet-sum"
 
 // ---------------------------------------------------------------------------
-// Helper
+// Helpers
 // ---------------------------------------------------------------------------
 
 function parseBeløp(str: string): number {
@@ -19,72 +18,102 @@ function parseBeløp(str: string): number {
   return isNaN(tall) || tall < 0 ? 0 : tall
 }
 
+function avrundTilNærmeste100(n: number): number {
+  return Math.round(n / 100) * 100
+}
+
 // ---------------------------------------------------------------------------
 // Distribution bar
 // ---------------------------------------------------------------------------
 
 interface FordelingsBarProps {
   kategorier: UventetSumKategori[]
-  ufordeltKr: number
+  beløp: number
+  tilgjengeligKr: number
 }
 
-function FordelingsBar({ kategorier, ufordeltKr }: FordelingsBarProps) {
-  const synlige = kategorier.filter((k) => k.prosent > 0)
-  const ufordeltProsent = 100 - kategorier.reduce((s, k) => s + k.prosent, 0)
+function FordelingsBar({ kategorier, beløp, tilgjengeligKr }: FordelingsBarProps) {
+  const synlige = kategorier.filter((k) => k.kr > 0)
+  const tilgjengeligProsent = (tilgjengeligKr / beløp) * 100
 
   return (
-    // The bar is always full-width. Colored segments take their share,
-    // and the grey remainder segment (flex-1) fills whatever is left —
-    // this works for all cases: fully allocated, partially allocated, and
-    // float over-allocation (flex naturally clamps the remainder to 0).
     <div className="flex h-7 w-full overflow-hidden rounded-lg">
       {synlige.map((k, i) => {
+        const bredde = (k.kr / beløp) * 100
         const erFørste = i === 0
-        // Round only for display — internal prosent stays float for kr precision
-        const prosDisplay = Math.round(k.prosent)
-        const visLabel = k.prosent >= 8
+        const visLabel = bredde >= 8
 
         return (
           <div
             key={k.id}
-            className="relative flex items-center justify-center overflow-hidden transition-all duration-200"
+            className="relative flex items-center justify-center overflow-hidden transition-all duration-150"
             style={{
-              width: `${k.prosent}%`,
+              width: `${bredde}%`,
               backgroundColor: k.farge,
               borderRadius: erFørste ? "0.5rem 0 0 0.5rem" : undefined,
             }}
-            title={`${k.navn || "Uten navn"} — ${prosDisplay}%`}
+            title={`${k.navn || "Uten navn"} — ${formatKr(k.kr)}`}
           >
             {visLabel && (
               <span className="truncate px-1 text-[10px] font-semibold text-white/90">
-                {prosDisplay}%
+                {Math.round(bredde)}%
               </span>
             )}
           </div>
         )
       })}
 
-      {/* Grey remainder — flex-1 so it always fills the remaining width.
-          Label rules: >= 25% segment AND sm: breakpoint → full text;
-          >= 5% segment → "?" (fits a single char); < 5% → no label. */}
+      {/* Grey remainder — represents unallocated funds */}
       <div
-        className="flex-1 flex items-center justify-center overflow-hidden bg-muted transition-all duration-200"
+        className="flex-1 flex items-center justify-center overflow-hidden bg-muted transition-all duration-150"
         style={{
           borderRadius: synlige.length === 0 ? "0.5rem" : "0 0.5rem 0.5rem 0",
         }}
-        title={ufordeltKr > 0 ? `${formatKr(ufordeltKr)} gjenstår` : undefined}
+        title={tilgjengeligKr > 0 ? `${formatKr(tilgjengeligKr)} gjenstår` : undefined}
       >
-        {ufordeltProsent >= 5 && (
+        {tilgjengeligProsent >= 5 && (
           <span className="truncate px-1 text-[10px] font-semibold text-foreground/50">
-            {/* Full text: only when segment is wide (>= 25%) AND screen is sm+ */}
-            {ufordeltProsent >= 25 && (
-              <span className="hidden sm:inline">{formatKr(ufordeltKr)} gjenstår</span>
+            {tilgjengeligProsent >= 25 && (
+              <span className="hidden sm:inline">{formatKr(tilgjengeligKr)} gjenstår</span>
             )}
-            {/* Question mark: fallback when full text is hidden */}
-            <span className={ufordeltProsent >= 25 ? "sm:hidden" : ""}>?</span>
+            <span className={tilgjengeligProsent >= 25 ? "sm:hidden" : ""}>?</span>
           </span>
         )}
       </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Pedagogical available-funds display
+// ---------------------------------------------------------------------------
+
+interface TilgjengeligDisplayProps {
+  tilgjengeligKr: number
+  beløp: number
+}
+
+function TilgjengeligDisplay({ tilgjengeligKr, beløp }: TilgjengeligDisplayProps) {
+  const altFordelt = tilgjengeligKr === 0
+
+  if (altFordelt) {
+    return (
+      <div className="flex items-center gap-2.5 rounded-lg bg-[oklch(0.62_0.15_140)]/10 px-4 py-3">
+        <CheckCircle size={18} className="shrink-0 text-[oklch(0.62_0.15_140)]" />
+        <div>
+          <p className="text-sm font-medium text-foreground">Alt er fordelt</p>
+          <p className="text-xs text-muted-foreground">
+            Du har fordelt alle {formatKr(beløp)}.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex items-center justify-between rounded-lg bg-muted/50 px-4 py-3">
+      <p className="text-sm text-muted-foreground">Gjenstår å fordele</p>
+      <p className="text-lg font-bold tabular-nums text-foreground">{formatKr(tilgjengeligKr)}</p>
     </div>
   )
 }
@@ -96,8 +125,8 @@ function FordelingsBar({ kategorier, ufordeltKr }: FordelingsBarProps) {
 interface KategoriRadProps {
   kategori: UventetSumKategori
   beløp: number
-  onEndreProsent: (id: string, prosent: number) => void
-  onLåsOpp: (id: string) => void
+  tilgjengeligKr: number
+  onEndreKr: (id: string, kr: number) => void
   onEndreNavn: (id: string, navn: string) => void
   onFjern: (id: string) => void
   kanFjernes: boolean
@@ -106,52 +135,36 @@ interface KategoriRadProps {
 function KategoriRad({
   kategori,
   beløp,
-  onEndreProsent,
-  onLåsOpp,
+  tilgjengeligKr,
+  onEndreKr,
   onEndreNavn,
   onFjern,
   kanFjernes,
 }: KategoriRadProps) {
-  const harBeløp = beløp > 0
-  const krVerdi = Math.round(beløp * kategori.prosent / 100)
-  // step=1 so the slider can hit any exact kr value; precision typing is available via click-to-edit
-
-  // Inline editing of the kr value — clicking the number opens a text input
   const [redigerer, setRedigerer] = useState(false)
   const [draft, setDraft] = useState("")
   const redigerInputRef = useRef<HTMLInputElement>(null)
 
   function startRedigering() {
-    if (!harBeløp) return
-    setDraft(String(krVerdi))
+    setDraft(String(kategori.kr))
     setRedigerer(true)
-    // Let the input mount before selecting its content
     setTimeout(() => redigerInputRef.current?.select(), 0)
   }
 
   function commitRedigering() {
     const parsed = parseInt(draft.replace(/\s/g, "").replace(/,/g, ""), 10)
-    if (!isNaN(parsed) && parsed >= 0 && beløp > 0) {
-      const nyProsent = Math.min(parsed, beløp) / beløp * 100
-      onEndreProsent(kategori.id, nyProsent)
+    if (!isNaN(parsed) && parsed >= 0) {
+      onEndreKr(kategori.id, avrundTilNærmeste100(Math.min(parsed, beløp)))
     }
     setRedigerer(false)
   }
 
-  // Convert a kr slider value to a float percent and dispatch.
-  // Keeping full float precision means Math.round(beløp * prosent / 100)
-  // recovers the exact dragged kr value rather than snapping to beløp/100 steps.
-  function handleSliderChange(krNy: number) {
-    if (harBeløp) {
-      onEndreProsent(kategori.id, krNy / beløp * 100)
-    } else {
-      onEndreProsent(kategori.id, krNy)
-    }
-  }
+  // Max this slider can reach: current allocation + what's still free
+  const sliderMax = Math.max(kategori.kr + tilgjengeligKr, kategori.kr)
 
   return (
     <div className="space-y-2">
-      {/* Header: color dot + name input + action buttons */}
+      {/* Header: color dot + name input + delete button */}
       <div className="flex items-center gap-2">
         <div
           className="h-3 w-3 shrink-0 rounded-full"
@@ -166,33 +179,20 @@ function KategoriRad({
           className="min-w-0 flex-1 bg-transparent text-sm font-medium text-foreground outline-none placeholder:text-muted-foreground/60"
           aria-label="Kategorinavn"
         />
-        <div className="flex shrink-0 items-center gap-1">
-          {kategori.locked && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onLåsOpp(kategori.id)}
-              className="h-7 gap-1 px-2 text-xs text-muted-foreground"
-            >
-              <LockOpenIcon size={12} />
-              Lås opp
-            </Button>
-          )}
-          {kanFjernes && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onFjern(kategori.id)}
-              className="h-7 w-7 text-muted-foreground hover:text-destructive"
-              aria-label={`Fjern ${kategori.navn || "kategori"}`}
-            >
-              <TrashIcon size={14} />
-            </Button>
-          )}
-        </div>
+        {kanFjernes && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onFjern(kategori.id)}
+            className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive"
+            aria-label={`Fjern ${kategori.navn || "kategori"}`}
+          >
+            <TrashIcon size={14} />
+          </Button>
+        )}
       </div>
 
-      {/* Editable value — click to type an exact kr amount */}
+      {/* Editable kr value */}
       {redigerer ? (
         <div className="relative inline-flex items-baseline gap-1">
           <input
@@ -203,8 +203,6 @@ function KategoriRad({
             onChange={(e) => setDraft(e.target.value)}
             onBlur={commitRedigering}
             onKeyDown={(e) => {
-              // Trigger blur on Enter so onBlur handles the single commit path —
-              // avoids double-calling commitRedigering (which would re-redistribute)
               if (e.key === "Enter") e.currentTarget.blur()
               if (e.key === "Escape") setRedigerer(false)
             }}
@@ -215,33 +213,28 @@ function KategoriRad({
         </div>
       ) : (
         <button
-          onClick={harBeløp ? startRedigering : undefined}
-          className={[
-            "text-xl font-bold tabular-nums text-left",
-            harBeløp
-              ? "cursor-text text-foreground hover:text-primary transition-colors"
-              : "cursor-default text-foreground",
-          ].join(" ")}
-          title={harBeløp ? "Klikk for å skrive inn et eksakt beløp" : undefined}
+          onClick={startRedigering}
+          className="text-xl font-bold tabular-nums text-left cursor-text text-foreground hover:text-primary transition-colors"
+          title="Klikk for å skrive inn et eksakt beløp"
         >
-          {harBeløp ? formatKr(krVerdi) : `${kategori.prosent}%`}
+          {formatKr(kategori.kr)}
         </button>
       )}
 
-      {/* Kr-based slider (step adapts to amount for clean increments) */}
+      {/* Slider — step=100 for clean increments, max capped at what's available */}
       <Slider
-        value={[harBeløp ? krVerdi : kategori.prosent]}
+        value={[kategori.kr]}
         min={0}
-        max={harBeløp ? beløp : 100}
-        step={1}
-        onValueChange={([v]) => handleSliderChange(v)}
+        max={sliderMax || beløp}
+        step={100}
+        onValueChange={([v]) => onEndreKr(kategori.id, v)}
         aria-label={`Fordeling for ${kategori.navn || "kategori"}`}
       />
 
       {/* Slider end labels */}
       <div className="flex justify-between text-xs text-muted-foreground">
-        <span>{harBeløp ? "0 kr" : "0%"}</span>
-        <span>{harBeløp ? formatKr(beløp) : "100%"}</span>
+        <span>0 kr</span>
+        <span>{formatKr(beløp)}</span>
       </div>
     </div>
   )
@@ -255,33 +248,27 @@ export function UventetSumApp() {
   const {
     state,
     setBeløp,
-    endreProsent,
-    låsOpp,
+    endreKr,
     endreNavn,
     leggTilKategori,
     fjernKategori,
     nullstillFordeling,
   } = useUventetSumState()
 
-  // Draft string for the beløp input — only commits on blur/Enter
   const [beløpDraft, setBeløpDraft] = useState(
     state.beløp > 0 ? String(state.beløp) : ""
   )
 
   const harBeløp = state.beløp > 0
 
-  // Kr remaining after all categories are allocated. Uses Math.round per category so
-  // the result matches what the user sees in the summary (same rounding as display).
-  const fordeltKr = state.kategorier.reduce(
-    (s, k) => s + Math.round(state.beløp * k.prosent / 100),
-    0
-  )
-  const ufordeltKr = state.beløp - fordeltKr
+  const fordeltKr = state.kategorier.reduce((s, k) => s + k.kr, 0)
+  const tilgjengeligKr = state.beløp - fordeltKr
 
   function commitBeløp(raw: string) {
     const parsed = parseBeløp(raw)
-    setBeløp(parsed)
-    setBeløpDraft(parsed > 0 ? String(parsed) : "")
+    const rundet = parsed > 0 ? avrundTilNærmeste100(parsed) : 0
+    setBeløp(rundet)
+    setBeløpDraft(rundet > 0 ? String(rundet) : "")
   }
 
   return (
@@ -296,8 +283,8 @@ export function UventetSumApp() {
           Fått inn en uventet sum?
         </h1>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Fordel beløpet mellom kategorier. Dra en slider for å låse den — de andre
-          tilpasser seg automatisk.
+          Fordel beløpet mellom kategorier. Dra en slider for å velge hvor mye som
+          går til hvert formål — totalen kan ikke overgå det du har fått inn.
         </p>
       </div>
 
@@ -306,7 +293,6 @@ export function UventetSumApp() {
         <label htmlFor="beløp-input" className="text-sm font-medium">
           Hvor mye har du fått?
         </label>
-        {/* Input + button inline — button stays visible for re-running with a new amount */}
         <div className="flex items-center gap-2">
           <div className="relative w-40 sm:w-48">
             <Input
@@ -334,20 +320,29 @@ export function UventetSumApp() {
             onClick={() => commitBeløp(beløpDraft)}
             disabled={parseBeløp(beløpDraft) === 0}
           >
-            Se fordeling
+            Start fordeling
             <ArrowRightIcon data-icon="inline-end" />
           </Button>
         </div>
+        <p className="text-xs text-muted-foreground">
+          Vi avrunder til nærmeste 100 kr for ryddigere beløp.
+        </p>
       </div>
 
       {/* Distribution section — only visible once an amount is entered */}
       {harBeløp && (
         <div className="space-y-8">
 
-          {/* Distribution bar + reset — reset lives here so it's close to
-              the thing it affects and doesn't require scrolling past all sliders */}
+          {/* Available-funds display */}
+          <TilgjengeligDisplay tilgjengeligKr={tilgjengeligKr} beløp={state.beløp} />
+
+          {/* Distribution bar + reset */}
           <div className="space-y-2">
-            <FordelingsBar kategorier={state.kategorier} ufordeltKr={ufordeltKr} />
+            <FordelingsBar
+              kategorier={state.kategorier}
+              beløp={state.beløp}
+              tilgjengeligKr={tilgjengeligKr}
+            />
             <Button
               variant="outline"
               size="sm"
@@ -359,17 +354,6 @@ export function UventetSumApp() {
             </Button>
           </div>
 
-          {/* Alert: shown only when there are unallocated kr */}
-          {ufordeltKr > 0 && (
-            <Alert>
-              <WarningIcon size={16} />
-              <AlertTitle>{formatKr(ufordeltKr)} er ikke fordelt ennå.</AlertTitle>
-              <AlertDescription>
-                Lås opp en kategori eller juster en slider for å fordele resten.
-              </AlertDescription>
-            </Alert>
-          )}
-
           {/* Category sliders */}
           <div className="space-y-6">
             {state.kategorier.map((kat) => (
@@ -377,8 +361,8 @@ export function UventetSumApp() {
                 key={kat.id}
                 kategori={kat}
                 beløp={state.beløp}
-                onEndreProsent={endreProsent}
-                onLåsOpp={låsOpp}
+                tilgjengeligKr={tilgjengeligKr}
+                onEndreKr={endreKr}
                 onEndreNavn={endreNavn}
                 onFjern={fjernKategori}
                 kanFjernes={state.kategorier.length > 1}
@@ -408,7 +392,7 @@ export function UventetSumApp() {
             </p>
             <div className="space-y-2">
               {state.kategorier
-                .filter((k) => k.prosent > 0)
+                .filter((k) => k.kr > 0)
                 .map((k) => (
                   <div key={k.id} className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-sm">
@@ -419,21 +403,18 @@ export function UventetSumApp() {
                       />
                       <span className="text-foreground">{k.navn || "Uten navn"}</span>
                     </div>
-                    <span className="tabular-nums text-sm font-medium">
-                      {formatKr(Math.round(state.beløp * k.prosent / 100))}
-                    </span>
+                    <span className="tabular-nums text-sm font-medium">{formatKr(k.kr)}</span>
                   </div>
                 ))}
             </div>
-            {/* Unallocated row — only shown when kr remain */}
-            {ufordeltKr > 0 && (
+            {tilgjengeligKr > 0 && (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm">
                   <div className="h-2.5 w-2.5 shrink-0 rounded-full bg-muted-foreground/30" aria-hidden />
                   <span className="text-muted-foreground">Ikke fordelt</span>
                 </div>
                 <span className="tabular-nums text-sm font-medium text-muted-foreground">
-                  {formatKr(ufordeltKr)}
+                  {formatKr(tilgjengeligKr)}
                 </span>
               </div>
             )}

@@ -1,10 +1,8 @@
 export interface UventetSumKategori {
   id: string
   navn: string
-  /** Percentage allocation (0–100). Sum across all categories should equal 100. */
-  prosent: number
-  /** When true this category is pinned and excluded from auto-redistribution. */
-  locked: boolean
+  /** Kr allocated to this category (0 to state.beløp). */
+  kr: number
   farge: string
 }
 
