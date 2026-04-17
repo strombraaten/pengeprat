@@ -274,8 +274,8 @@ export function FordelingTabell({
               <div
                 role="row"
                 className={[
-                  "border-b border-border last:border-b-0 transition-colors",
-                  erAktiv ? "bg-muted/30" : "hover:bg-accent cursor-pointer",
+                  "border-b border-border last:border-b-0 transition-colors cursor-pointer",
+                  erAktiv ? "bg-muted/30" : "hover:bg-accent",
                 ].join(" ")}
               >
                 {/* Main row content */}

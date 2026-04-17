@@ -125,6 +125,7 @@ function TilgjengeligDisplay({ tilgjengeligKr, beløp }: TilgjengeligDisplayProp
 interface KategoriRadProps {
   kategori: UventetSumKategori
   beløp: number
+  tilgjengeligKr: number
   onEndreKr: (id: string, kr: number) => void
   onEndreNavn: (id: string, navn: string) => void
   onFjern: (id: string) => void
@@ -134,6 +135,7 @@ interface KategoriRadProps {
 function KategoriRad({
   kategori,
   beløp,
+  tilgjengeligKr,
   onEndreKr,
   onEndreNavn,
   onFjern,
@@ -156,6 +158,9 @@ function KategoriRad({
     }
     setRedigerer(false)
   }
+
+  // Max this slider can reach: current allocation + what's still free
+  const sliderMax = Math.max(kategori.kr + tilgjengeligKr, kategori.kr)
 
   return (
     <div className="space-y-2">
@@ -216,10 +221,11 @@ function KategoriRad({
         </button>
       )}
 
+      {/* Slider — step=100 for clean increments, max capped at what's available */}
       <Slider
         value={[kategori.kr]}
         min={0}
-        max={beløp}
+        max={sliderMax || beløp}
         step={100}
         onValueChange={([v]) => onEndreKr(kategori.id, v)}
         aria-label={`Fordeling for ${kategori.navn || "kategori"}`}
@@ -277,10 +283,8 @@ export function UventetSumApp() {
           Fått inn en uventet sum?
         </h1>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Her har du en mulighet til å gjøre framtids-deg en tjeneste. Ikke vent
-          til pengene nesten er brukt opp før du setter av noe til sparing. Start
-          her med å velge hvor mye som skal gå til hvert formål, og sett av en
-          dedikert sum til hygge (også kjent som guiltfree spending).
+          Fordel beløpet mellom kategorier. Dra en slider for å velge hvor mye som
+          går til hvert formål — totalen kan ikke overgå det du har fått inn.
         </p>
       </div>
 
@@ -321,7 +325,7 @@ export function UventetSumApp() {
           </Button>
         </div>
         <p className="text-xs text-muted-foreground">
-          For enkelhets skyld runder vi av summen til nærmeste hundre kroner.
+          Vi avrunder til nærmeste 100 kr for ryddigere beløp.
         </p>
       </div>
 
@@ -357,6 +361,7 @@ export function UventetSumApp() {
                 key={kat.id}
                 kategori={kat}
                 beløp={state.beløp}
+                tilgjengeligKr={tilgjengeligKr}
                 onEndreKr={endreKr}
                 onEndreNavn={endreNavn}
                 onFjern={fjernKategori}
