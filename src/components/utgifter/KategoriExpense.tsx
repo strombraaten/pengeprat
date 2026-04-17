@@ -29,6 +29,7 @@ const ICON_MAP: Record<string, PhosphorIconComponent> = {
   ShoppingCart: PhosphorIcons.ShoppingCart,
   Smiley: PhosphorIcons.Smiley,
   Baby: PhosphorIcons.Baby,
+  Package: PhosphorIcons.Package,
 }
 
 export const KategoriExpense: React.FC<KategoriExpenseProps> = ({

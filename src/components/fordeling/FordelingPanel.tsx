@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
 import { XIcon, WarningIcon } from "@phosphor-icons/react"
 import { KATEGORIER } from "@/lib/kategorier"
-import { formatKr, formaterTidshorisont } from "@/lib/formatering"
+import { formatKr, formaterTidshorisont, formaterTidsperiodeLang } from "@/lib/formatering"
 import {
   beregnKrPerUke,
   beregnMånederTilMål,
@@ -153,9 +153,22 @@ export function FordelingPanel({
               {formatKr(månedlig)}
             </p>
             <p className="text-sm text-muted-foreground mt-1">
-              {prosent}% av lønnen · {formatKr(lønn * 12 / 12 - månedlig)} igjen til andre poster
+              {prosent} % av lønnen per måned
             </p>
           </div>
+
+          {/* Already saved input — shown early so context is clear before progress */}
+          {kat.harAlleredeSpart && (
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium">Allerede spart</label>
+              <NumberInput
+                value={post.alleredeSpart}
+                placeholder="0"
+                ariaLabel="Allerede spart beløp i kroner"
+                onChange={(verdi) => onEndreAlleredeSpart(kat.id, verdi ?? 0)}
+              />
+            </div>
+          )}
 
           {/* Goal progress (buffer, ferie, storeLivshendelser) */}
           {kat.harTidshorisont && (post.mål ?? 0) > 0 && (
@@ -169,7 +182,7 @@ export function FordelingPanel({
               <Progress value={spareProsent} className="h-1.5" />
               {månederTilMål !== null && (
                 <p className="text-xs text-muted-foreground text-right">
-                  {formaterTidshorisont(månederTilMål)} til mål
+                  Med denne summen vil du nå målet om {formaterTidsperiodeLang(månederTilMål)}.
                 </p>
               )}
             </div>
@@ -236,16 +249,6 @@ export function FordelingPanel({
             )}
           </div>
 
-          {/* Hint box with category-colored left border */}
-          <div
-            className="rounded-lg bg-muted/30 px-4 py-3 border-l-4"
-            style={{ borderLeftColor: kat.farge }}
-          >
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              {kat.beskrivelse}
-            </p>
-          </div>
-
           {/* Goal input (storeLivshendelser) */}
           {kat.harMålInput && (
             <div className="space-y-1.5">
@@ -259,18 +262,6 @@ export function FordelingPanel({
             </div>
           )}
 
-          {/* Already saved input */}
-          {kat.harAlleredeSpart && (
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Allerede spart</label>
-              <NumberInput
-                value={post.alleredeSpart}
-                placeholder="0"
-                ariaLabel="Allerede spart beløp i kroner"
-                onChange={(verdi) => onEndreAlleredeSpart(kat.id, verdi ?? 0)}
-              />
-            </div>
-          )}
 
         </div>
       </>
