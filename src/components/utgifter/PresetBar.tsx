@@ -13,7 +13,7 @@ const PRESET_KEYS: PresetKey[] = ["student", "singel", "par", "familie", "snartp
 export const PresetBar: React.FC<PresetBarProps> = ({ selectedPreset, onPresetSelect }) => {
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <label className="text-sm font-medium text-muted-foreground">Forhåndsinnstillinger:</label>
+      <label className="text-sm font-medium text-muted-foreground">Utgangspunkt:</label>
       <div className="flex flex-wrap gap-2">
         {PRESET_KEYS.map((preset) => (
           <Button
