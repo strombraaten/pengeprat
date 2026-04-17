@@ -202,14 +202,10 @@ export function SparemaalApp() {
       </div>
 
       {/* Priority note */}
-      <div className="rounded-md border border-border bg-muted/50 px-3 py-2.5 text-xs text-muted-foreground">
-        <strong className="text-foreground">Alltid start med bufferen.</strong>
-        {" "}Å kunne betale uventede regninger uten å røre kredittkortet er på en måte grunnmuren som holder resten stødig.
-      </div>
-
-      {/* Kredittgjeld disclaimer */}
-      <div className="text-xs text-muted-foreground px-0.5">
-        Har du kredittgjeld eller forbrukslån? I så fall lønner det seg å betale ned det aller først.
+      <div className="rounded-md border border-border bg-muted/50 px-3 py-2.5 text-xs text-muted-foreground space-y-1.5">
+        <p><strong className="text-foreground">Alltid start med bufferen.</strong>
+        {" "}Å kunne betale uventede regninger uten å røre kredittkortet er på en måte grunnmuren som holder resten stødig.</p>
+        <p>Har du kredittgjeld eller forbrukslån? I så fall lønner det seg å betale ned det aller først.</p>
       </div>
 
       {/* 1. Buffer */}
