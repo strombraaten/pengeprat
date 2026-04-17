@@ -13,6 +13,7 @@ export function formaterTidsperiodeLang(måneder: number): string {
   return `${år} år og ${rest} måneder`
 }
 
+export function formaterTidshorisont(måneder: number): string {
   if (!isFinite(måneder)) return "aldri (øk månedlig sparing)"
   if (måneder <= 0) return "Mål nådd!"
   const år = Math.floor(måneder / 12)
