@@ -305,7 +305,7 @@ export function FordelingPanel({
         {/* Backdrop — fades in/out */}
         <div
           className={[
-            "absolute inset-0 bg-black/50 transition-opacity duration-300",
+            "absolute inset-0 bg-black/50 transition-opacity duration-300 cursor-pointer",
             activePostId ? "opacity-100" : "opacity-0",
           ].join(" ")}
           onClick={onClose}
