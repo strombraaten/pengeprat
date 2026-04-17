@@ -64,7 +64,7 @@ export const DEFAULT_CATEGORIES: ExpenseCategory[] = [
   },
   {
     id: "fritid",
-    name: "Fritid og underholdning",
+    name: "Abonnementer",
     icon: "Smiley",
     items: [
       { id: "treningssenter", label: "Treningssenter", amount: 399 },
