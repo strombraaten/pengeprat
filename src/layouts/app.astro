@@ -48,19 +48,19 @@ function erAktiv(href: string) {
 
     <!-- Top nav -->
     <header class="sticky top-0 z-10 border-b border-border bg-card">
-      <div class="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
+      <div class="mx-auto flex h-14 max-w-5xl items-center gap-2 px-4 sm:px-6">
         <a
           href="/"
-          class="text-sm font-semibold tracking-tight text-foreground hover:text-primary transition-colors"
+          class="shrink-0 text-sm font-semibold tracking-tight text-foreground hover:text-primary transition-colors"
         >
           Pengeprat
         </a>
-        <nav class="flex items-center gap-1">
+        <nav class="flex-1 min-w-0 flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {verktøy.map((v) => (
             <a
               href={v.href}
               class:list={[
-                "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                "shrink-0 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
                 erAktiv(v.href)
                   ? "bg-muted text-foreground"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
@@ -69,8 +69,10 @@ function erAktiv(href: string) {
               {v.label}
             </a>
           ))}
-          <ModeToggle client:load />
         </nav>
+        <div class="shrink-0">
+          <ModeToggle client:load />
+        </div>
       </div>
     </header>
 
