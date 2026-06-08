@@ -127,7 +127,7 @@ function MobileEkspansjon({
   const max = sliderMax(lønn, kat.sliderMaxFaktor ?? 0.2)
 
   return (
-    <div className="px-4 pb-4 space-y-4 border-t border-border">
+    <div className="px-6 pb-4 space-y-4 border-t border-border">
       {kat.inputType === "tekst" ? (
         <div className="pt-3 space-y-1.5">
           <label className="text-sm font-medium">Månedlige faste utgifter</label>
