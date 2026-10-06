@@ -6,12 +6,8 @@ import { KategoriExpense } from "./KategoriExpense"
 import { UtgifterBreakdown } from "./UtgifterBreakdown"
 
 export const UtgifterApp: React.FC = () => {
-  const { state, hydrated, updateAmount, addItem, removeItem, loadPreset, toggleExpanded } =
+  const { state, updateAmount, addItem, removeItem, loadPreset, toggleExpanded } =
     useUtgifterState()
-
-  if (!hydrated) {
-    return <div>Laster...</div>
-  }
 
   return (
     <div className="space-y-6">

@@ -1,7 +1,7 @@
 ---
 import Layout from "@/layouts/main.astro"
 import { ModeToggle } from "@/components/ModeToggle"
-import { ArrowRight } from "@phosphor-icons/react"
+import { ArrowRightIcon } from "@phosphor-icons/react"
 ---
 
 <Layout>
@@ -48,7 +48,7 @@ import { ArrowRight } from "@phosphor-icons/react"
             </div>
             <div class="flex items-center gap-1.5 text-sm font-medium text-primary mt-auto">
               <span>Start</span>
-              <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+              <ArrowRightIcon size={16} className="transition-transform group-hover:translate-x-0.5" />
             </div>
           </a>
 
@@ -69,7 +69,7 @@ import { ArrowRight } from "@phosphor-icons/react"
             </div>
             <div class="flex items-center gap-1.5 text-sm font-medium text-primary mt-auto">
               <span>Start</span>
-              <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+              <ArrowRightIcon size={16} className="transition-transform group-hover:translate-x-0.5" />
             </div>
           </a>
 
@@ -90,7 +90,7 @@ import { ArrowRight } from "@phosphor-icons/react"
             </div>
             <div class="flex items-center gap-1.5 text-sm font-medium text-primary mt-auto">
               <span>Start</span>
-              <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+              <ArrowRightIcon size={16} className="transition-transform group-hover:translate-x-0.5" />
             </div>
           </a>
 
@@ -105,14 +105,35 @@ import { ArrowRight } from "@phosphor-icons/react"
             <div class="space-y-1">
               <h2 class="font-semibold text-foreground">Fått inn en uventet sum?</h2>
               <p class="text-sm text-muted-foreground leading-relaxed">
-                Fordel en bonus, arvemidler eller annen uventet inntekt mellom
-                sparing, nytelse og framtid — med smarte slidere som låser seg
-                automatisk.
+                Fordel en bonus, arv eller annen uventet inntekt mellom sparing,
+                nytelse og framtid — med forslag basert på sparemålene dine.
               </p>
             </div>
             <div class="flex items-center gap-1.5 text-sm font-medium text-primary mt-auto">
               <span>Start</span>
-              <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+              <ArrowRightIcon size={16} className="transition-transform group-hover:translate-x-0.5" />
+            </div>
+          </a>
+
+          <!-- Min plan — samler resultatet av stegene -->
+          <a
+            href={"/plan"}
+            class="group flex flex-col gap-4 rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/30 sm:col-span-2"
+          >
+            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Resultatet
+            </span>
+            <div class="space-y-1">
+              <h2 class="font-semibold text-foreground">Min plan</h2>
+              <p class="text-sm text-muted-foreground leading-relaxed">
+                Stegene bygger på hverandre. Her samles alt: hva som går til hva
+                hver måned, sparemålene dine og når du er i mål. Skriv den ut
+                eller ta en sikkerhetskopi.
+              </p>
+            </div>
+            <div class="flex items-center gap-1.5 text-sm font-medium text-primary mt-auto">
+              <span>Se planen</span>
+              <ArrowRightIcon size={16} className="transition-transform group-hover:translate-x-0.5" />
             </div>
           </a>
 
@@ -147,7 +168,7 @@ import { ArrowRight } from "@phosphor-icons/react"
             Planen får du ved å ta en slags pengeprat med deg selv. Skaff deg
             en <a href={"/utgifter"} class="underline decoration-muted-foreground/40 hover:text-foreground hover:decoration-foreground transition-colors">oversikt over dine faste utgifter</a>. Se over hva du har spart opp
             fra før. <a href={"/fordeling"} class="underline decoration-muted-foreground/40 hover:text-foreground hover:decoration-foreground transition-colors">Fordel pengene</a> utover spareområdene. Sett opp faste trekk
-            fra lønningskontoen som går automatisk hver måned. Og kjenn på
+            fra lønningskontoen som går automatisk hver måned. Samle det i <a href={"/plan"} class="underline decoration-muted-foreground/40 hover:text-foreground hover:decoration-foreground transition-colors">planen din</a>. Og kjenn på
             følelsen av at du har kontroll, uavhengig av hvor mye du faktisk
             tjener.
           </p>

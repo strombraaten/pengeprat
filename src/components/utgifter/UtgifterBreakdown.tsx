@@ -2,11 +2,11 @@ import type React from "react"
 import {
   calculateGrandTotal,
   calculatePercentage,
-  formatKr,
   formatAnnual,
   getCategoriesWithData,
 } from "@/lib/utgifter-utils"
 import type { ExpenseCategory } from "@/types/utgifter"
+import { formatKr } from "@/lib/formatering"
 import { CATEGORY_COLORS } from "@/lib/utgifter-data"
 import { Separator } from "@/components/ui/separator"
 

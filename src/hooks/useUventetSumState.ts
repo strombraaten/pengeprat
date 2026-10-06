@@ -7,15 +7,8 @@ import {
   saveUventetSumState,
 } from "@/lib/uventet-sum-storage"
 
-function lagInitialState(): UventetSumState {
-  if (typeof window === "undefined") {
-    return { beløp: 0, kategorier: klonaKategorier() }
-  }
-  return loadUventetSumState()
-}
-
 export function useUventetSumState() {
-  const [state, setState] = useState<UventetSumState>(lagInitialState)
+  const [state, setState] = useState<UventetSumState>(loadUventetSumState)
 
   useEffect(() => {
     saveUventetSumState(state)
@@ -77,8 +70,19 @@ export function useUventetSumState() {
     setState((prev) => ({ ...prev, kategorier: klonaKategorier() }))
   }, [])
 
+  // Fyller inn et forslag (kr per kategori-id). Kategorier som mangler i
+  // forslaget settes til 0; forslag til kategorier brukeren har slettet
+  // blir stående som «ikke fordelt».
+  const brukForslag = useCallback((kr: Partial<Record<string, number>>) => {
+    setState((prev) => ({
+      ...prev,
+      kategorier: prev.kategorier.map((k) => ({ ...k, kr: kr[k.id] ?? 0 })),
+    }))
+  }, [])
+
   return {
     state,
+    brukForslag,
     setBeløp,
     endreKr,
     endreNavn,

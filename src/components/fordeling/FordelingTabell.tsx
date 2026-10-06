@@ -1,4 +1,4 @@
-import { useState, useId, useRef } from "react"
+import { useState, useId } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
@@ -13,6 +13,8 @@ import {
   sliderMax,
 } from "@/lib/beregninger"
 import type { PostId, PostState, Kategori } from "@/types/fordeling"
+import { parseBeløp } from "@/lib/tall"
+import { useSynketVerdi } from "@/hooks/useSynketVerdi"
 
 interface FordelingTabellProps {
   lønn: number
@@ -27,12 +29,6 @@ interface FordelingTabellProps {
 
 // ─── FasteUtgifter input ───────────────────────────────────────────────────
 
-function parseNummer(str: string): number | null {
-  const renset = str.replace(/\s/g, "").replace(/,/g, "")
-  const tall = parseInt(renset, 10)
-  return isNaN(tall) ? null : tall
-}
-
 // Controlled input for fasteUtgifter that uses a local draft string so the
 // field stays editable while typing, but only flushes on blur or Enter.
 // This avoids the "input won't update after Tilbakestill" bug with defaultValue.
@@ -45,25 +41,18 @@ function FasteUtgifterInput({
   lønn: number
   onChange: (ny: number) => void
 }) {
-  const [draft, setDraft] = useState(() => String(månedlig))
+  // Draft synkes når beløpet endres utenfra (f.eks. Tilbakestill)
+  const [draft, setDraft, tilbakestillDraft] = useSynketVerdi(String(månedlig))
 
   // Flush draft to parent state on blur or Enter
   function flush() {
-    const ny = parseNummer(draft)
+    const ny = parseBeløp(draft)
     if (ny && ny > 0 && ny < lønn) {
       onChange(ny)
     } else {
       // Reset to last valid value if input is out of range
-      setDraft(String(månedlig))
+      tilbakestillDraft()
     }
-  }
-
-  // Sync draft when monthly amount changes from outside (e.g. Tilbakestill)
-  // We compare to avoid resetting mid-edit
-  const prevMånedlig = useRef(månedlig)
-  if (prevMånedlig.current !== månedlig) {
-    prevMånedlig.current = månedlig
-    setDraft(String(månedlig))
   }
 
   return (
@@ -111,17 +100,9 @@ function MobileEkspansjon({
   sliderId: string
 }) {
   const månedlig = post.månedlig ?? 0
-  // Local optimistic display value — updated immediately on drag
-  const [visVerdi, setVisVerdi] = useState(månedlig)
-
-  // Sync with external state (e.g. after Tilbakestill or another post change)
-  const prevMånedlig = useRef(månedlig)
-  if (prevMånedlig.current !== månedlig && visVerdi === prevMånedlig.current) {
-    prevMånedlig.current = månedlig
-    setVisVerdi(månedlig)
-  } else {
-    prevMånedlig.current = månedlig
-  }
+  // Local optimistic display value — updated immediately on drag,
+  // synced when the state changes (Tilbakestill, omfordeling)
+  const [visVerdi, setVisVerdi, tilbakestillVisVerdi] = useSynketVerdi(månedlig)
 
   const min = sliderMin()
   const max = sliderMax(lønn, kat.sliderMaxFaktor ?? 0.2)
@@ -152,7 +133,11 @@ function MobileEkspansjon({
             // Instant visual feedback on drag
             onValueChange={([ny]) => setVisVerdi(ny)}
             // Only propagate to budget redistribution logic when drag ends
-            onValueCommit={([ny]) => onEndrePost(ny)}
+            onValueCommit={([ny]) => {
+              onEndrePost(ny)
+              // Hvis verdien ble begrenset, vis den faktiske verdien
+              tilbakestillVisVerdi()
+            }}
           />
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>{formatKr(min)}</span>
@@ -185,6 +170,161 @@ function MobileEkspansjon({
       )}
     </div>
   )
+}
+
+// ─── Table row ─────────────────────────────────────────────────────────────
+
+// Én rad per post. Egen komponent slik at hver rad kan ha sin egen
+// slider-state (hooks kan ikke kalles inne i en .map()).
+function FordelingRad({
+  kat,
+  post,
+  lønn,
+  baseId,
+  erAktiv,
+  mobilEkspandert,
+  onToggleMobil,
+  onSelectPost,
+  onEndrePost,
+  onEndreFasteUtgifter,
+}: {
+  kat: Kategori
+  post: PostState
+  lønn: number
+  baseId: string
+  erAktiv: boolean
+  mobilEkspandert: boolean
+  onToggleMobil: () => void
+  onSelectPost: (id: PostId | null) => void
+  onEndrePost: (id: PostId, verdi: number) => void
+  onEndreFasteUtgifter: (verdi: number) => void
+}) {
+      const månedlig = post?.månedlig ?? 0
+      const prosent = lønn > 0 ? Math.round((månedlig / lønn) * 100) : 0
+      const sliderId = `${baseId}-slider-${kat.id}`
+      const navnId = `${baseId}-navn-${kat.id}`
+
+      // Local optimistic value for desktop slider — updates on drag,
+      // commits to state only on drag-end (onValueCommit)
+      const [visVerdi, setVisVerdi, tilbakestillVisVerdi] = useSynketVerdi(månedlig)
+
+      const min = sliderMin()
+      const max = sliderMax(lønn, kat.sliderMaxFaktor ?? 0.2)
+
+      return (
+        <Collapsible
+          open={mobilEkspandert}
+          onOpenChange={onToggleMobil}
+        >
+          <div
+            role="row"
+            className={[
+              "border-b border-border last:border-b-0 transition-colors cursor-pointer",
+              erAktiv ? "bg-muted/30" : "hover:bg-accent",
+            ].join(" ")}
+          >
+            {/* Main row content */}
+            <div className="grid grid-cols-[8px_1fr_auto_auto] lg:grid-cols-[8px_1fr_auto_auto_minmax(0,200px)] items-center gap-x-4 px-4 py-3">
+
+              {/* Color stripe — wider when active */}
+              <div
+                role="cell"
+                className="self-stretch rounded-full transition-[width] duration-200"
+                style={{
+                  backgroundColor: kat.farge,
+                  width: erAktiv ? "6px" : "4px",
+                }}
+              />
+
+              {/* Category name — clickable to open panel (desktop) or expand (mobile) */}
+              <div role="rowheader" id={navnId} className="min-w-0">
+                {/* Desktop: clicking name opens side panel */}
+                <button
+                  type="button"
+                  onClick={() => onSelectPost(erAktiv ? null : kat.id)}
+                  className="hidden lg:block text-left w-full"
+                >
+                  <span className="text-sm font-medium">{kat.navn}</span>
+                  <span className="block text-xs text-muted-foreground truncate mt-0.5">
+                    {kat.beskrivelse}
+                  </span>
+                </button>
+                {/* Mobile: clicking name expands inline */}
+                <CollapsibleTrigger asChild>
+                  <button
+                    type="button"
+                    className="lg:hidden text-left w-full"
+                  >
+                    <span className="text-sm font-medium">{kat.navn}</span>
+                    <span className="block text-xs text-muted-foreground truncate mt-0.5">
+                      {kat.beskrivelse}
+                    </span>
+                  </button>
+                </CollapsibleTrigger>
+              </div>
+
+              {/* Amount — monospace, right-aligned */}
+              <div
+                role="cell"
+                className="text-right pointer-events-none"
+                aria-label={`${formatKr(månedlig)} per måned`}
+              >
+                <span className="text-sm font-semibold tabular-nums font-mono">
+                  {formatKr(månedlig)}
+                </span>
+                <span className="text-xs text-muted-foreground">/mnd</span>
+              </div>
+
+              {/* Share % — muted, right-aligned */}
+              <div
+                role="cell"
+                className="text-right text-sm text-muted-foreground tabular-nums pointer-events-none"
+                aria-label={`${prosent} prosent av lønnen`}
+              >
+                {prosent}%
+              </div>
+
+              {/* Adjust control — desktop only */}
+              <div role="cell" className="hidden lg:block">
+                {kat.inputType === "tekst" ? (
+                  <FasteUtgifterInput
+                    månedlig={månedlig}
+                    lønn={lønn}
+                    onChange={onEndreFasteUtgifter}
+                  />
+                ) : (
+                  <Slider
+                    id={sliderId}
+                    value={[visVerdi]}
+                    min={min}
+                    max={max}
+                    step={50}
+                    onValueChange={([ny]) => setVisVerdi(ny)}
+                    onValueCommit={([ny]) => {
+                      onEndrePost(kat.id, ny)
+                      tilbakestillVisVerdi()
+                    }}
+                    aria-labelledby={navnId}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Mobile inline expansion */}
+            <CollapsibleContent className="lg:hidden data-[state=open]:animate-none overflow-hidden">
+              {/* grid-template-rows animation: 0fr → 1fr avoids max-height snap */}
+              <MobileEkspansjon
+                kat={kat}
+                post={post}
+                lønn={lønn}
+                onEndrePost={(verdi) => onEndrePost(kat.id, verdi)}
+                onEndreFasteUtgifter={onEndreFasteUtgifter}
+                sliderId={sliderId}
+              />
+            </CollapsibleContent>
+          </div>
+        </Collapsible>
+      )
 }
 
 // ─── Main table ────────────────────────────────────────────────────────────
@@ -238,146 +378,23 @@ export function FordelingTabell({
         </div>
 
         {/* Data rows */}
-        {KATEGORIER.map((kat) => {
-          const post = poster[kat.id]
-          const månedlig = post?.månedlig ?? 0
-          const prosent = lønn > 0 ? Math.round((månedlig / lønn) * 100) : 0
-          const erAktiv = activePost === kat.id
-          const sliderId = `${baseId}-slider-${kat.id}`
-          const navnId = `${baseId}-navn-${kat.id}`
-
-          // Local optimistic value for desktop slider — updates on drag,
-          // commits to state only on drag-end (onValueCommit)
-          const [visVerdi, setVisVerdi] = useState(månedlig)
-          const prevMånedlig = useRef(månedlig)
-          if (prevMånedlig.current !== månedlig && visVerdi === prevMånedlig.current) {
-            prevMånedlig.current = månedlig
-            setVisVerdi(månedlig)
-          } else {
-            prevMånedlig.current = månedlig
-          }
-
-          const min = sliderMin()
-          const max = sliderMax(lønn, kat.sliderMaxFaktor ?? 0.2)
-
-          // Toggle mobile expansion
-          function handleMobileToggle() {
-            setMobileExpanded((prev) => (prev === kat.id ? null : kat.id))
-          }
-
-          return (
-            <Collapsible
-              key={kat.id}
-              open={mobileExpanded === kat.id}
-              onOpenChange={handleMobileToggle}
-            >
-              <div
-                role="row"
-                className={[
-                  "border-b border-border last:border-b-0 transition-colors cursor-pointer",
-                  erAktiv ? "bg-muted/30" : "hover:bg-accent",
-                ].join(" ")}
-              >
-                {/* Main row content */}
-                <div className="grid grid-cols-[8px_1fr_auto_auto] lg:grid-cols-[8px_1fr_auto_auto_minmax(0,200px)] items-center gap-x-4 px-4 py-3">
-
-                  {/* Color stripe — wider when active */}
-                  <div
-                    role="cell"
-                    className="self-stretch rounded-full transition-[width] duration-200"
-                    style={{
-                      backgroundColor: kat.farge,
-                      width: erAktiv ? "6px" : "4px",
-                    }}
-                  />
-
-                  {/* Category name — clickable to open panel (desktop) or expand (mobile) */}
-                  <div role="rowheader" id={navnId} className="min-w-0">
-                    {/* Desktop: clicking name opens side panel */}
-                    <button
-                      type="button"
-                      onClick={() => onSelectPost(erAktiv ? null : kat.id)}
-                      className="hidden lg:block text-left w-full"
-                    >
-                      <span className="text-sm font-medium">{kat.navn}</span>
-                      <span className="block text-xs text-muted-foreground truncate mt-0.5">
-                        {kat.beskrivelse}
-                      </span>
-                    </button>
-                    {/* Mobile: clicking name expands inline */}
-                    <CollapsibleTrigger asChild>
-                      <button
-                        type="button"
-                        className="lg:hidden text-left w-full"
-                      >
-                        <span className="text-sm font-medium">{kat.navn}</span>
-                        <span className="block text-xs text-muted-foreground truncate mt-0.5">
-                          {kat.beskrivelse}
-                        </span>
-                      </button>
-                    </CollapsibleTrigger>
-                  </div>
-
-                  {/* Amount — monospace, right-aligned */}
-                  <div
-                    role="cell"
-                    className="text-right pointer-events-none"
-                    aria-label={`${formatKr(månedlig)} per måned`}
-                  >
-                    <span className="text-sm font-semibold tabular-nums font-mono">
-                      {formatKr(månedlig)}
-                    </span>
-                    <span className="text-xs text-muted-foreground">/mnd</span>
-                  </div>
-
-                  {/* Share % — muted, right-aligned */}
-                  <div
-                    role="cell"
-                    className="text-right text-sm text-muted-foreground tabular-nums pointer-events-none"
-                    aria-label={`${prosent} prosent av lønnen`}
-                  >
-                    {prosent}%
-                  </div>
-
-                  {/* Adjust control — desktop only */}
-                  <div role="cell" className="hidden lg:block">
-                    {kat.inputType === "tekst" ? (
-                      <FasteUtgifterInput
-                        månedlig={månedlig}
-                        lønn={lønn}
-                        onChange={onEndreFasteUtgifter}
-                      />
-                    ) : (
-                      <Slider
-                        id={sliderId}
-                        value={[visVerdi]}
-                        min={min}
-                        max={max}
-                        step={50}
-                        onValueChange={([ny]) => setVisVerdi(ny)}
-                        onValueCommit={([ny]) => onEndrePost(kat.id, ny)}
-                        aria-labelledby={navnId}
-                      />
-                    )}
-                  </div>
-                </div>
-
-                {/* Mobile inline expansion */}
-                <CollapsibleContent className="lg:hidden data-[state=open]:animate-none overflow-hidden">
-                  {/* grid-template-rows animation: 0fr → 1fr avoids max-height snap */}
-                  <MobileEkspansjon
-                    kat={kat}
-                    post={post}
-                    lønn={lønn}
-                    onEndrePost={(verdi) => onEndrePost(kat.id, verdi)}
-                    onEndreFasteUtgifter={onEndreFasteUtgifter}
-                    sliderId={sliderId}
-                  />
-                </CollapsibleContent>
-              </div>
-            </Collapsible>
-          )
-        })}
+        {KATEGORIER.map((kat) => (
+          <FordelingRad
+            key={kat.id}
+            kat={kat}
+            post={poster[kat.id]}
+            lønn={lønn}
+            baseId={baseId}
+            erAktiv={activePost === kat.id}
+            mobilEkspandert={mobileExpanded === kat.id}
+            onToggleMobil={() =>
+              setMobileExpanded((prev) => (prev === kat.id ? null : kat.id))
+            }
+            onSelectPost={onSelectPost}
+            onEndrePost={onEndrePost}
+            onEndreFasteUtgifter={onEndreFasteUtgifter}
+          />
+        ))}
 
         {/* Footer row: totals */}
         <div

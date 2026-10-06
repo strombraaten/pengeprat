@@ -3,10 +3,23 @@ import { useState } from "react"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Button } from "@/components/ui/button"
 import { ExpenseRow } from "./ExpenseRow"
-import { calculateCategoryTotal, formatKr } from "@/lib/utgifter-utils"
-import type { ExpenseCategory, ExpenseItemId } from "@/types/utgifter"
-import { CaretDown, Plus } from "@phosphor-icons/react"
-import * as PhosphorIcons from "@phosphor-icons/react"
+import { calculateCategoryTotal } from "@/lib/utgifter-utils"
+import { formatKr } from "@/lib/formatering"
+import type { ExpenseCategory, ExpenseItemId, PhosphorIconName } from "@/types/utgifter"
+import {
+  BabyIcon,
+  CaretDownIcon,
+  CarIcon,
+  CreditCardIcon,
+  HouseIcon,
+  PackageIcon,
+  PhoneIcon,
+  PlusIcon,
+  ShieldIcon,
+  ShoppingCartIcon,
+  SmileyIcon,
+  type Icon,
+} from "@phosphor-icons/react"
 
 interface KategoriExpenseProps {
   category: ExpenseCategory
@@ -17,19 +30,16 @@ interface KategoriExpenseProps {
   onAddItem: (label: string, amount: number) => void
 }
 
-// Type-safe icon mapping
-type PhosphorIconComponent = React.FC<{ size?: number; weight?: string; className?: string }>
-
-const ICON_MAP: Record<string, PhosphorIconComponent> = {
-  House: PhosphorIcons.House,
-  CreditCard: PhosphorIcons.CreditCard,
-  Car: PhosphorIcons.Car,
-  Phone: PhosphorIcons.Phone,
-  Shield: PhosphorIcons.Shield,
-  ShoppingCart: PhosphorIcons.ShoppingCart,
-  Smiley: PhosphorIcons.Smiley,
-  Baby: PhosphorIcons.Baby,
-  Package: PhosphorIcons.Package,
+const ICON_MAP: Record<PhosphorIconName, Icon> = {
+  House: HouseIcon,
+  CreditCard: CreditCardIcon,
+  Car: CarIcon,
+  Phone: PhoneIcon,
+  Shield: ShieldIcon,
+  ShoppingCart: ShoppingCartIcon,
+  Smiley: SmileyIcon,
+  Baby: BabyIcon,
+  Package: PackageIcon,
 }
 
 export const KategoriExpense: React.FC<KategoriExpenseProps> = ({
@@ -44,7 +54,7 @@ export const KategoriExpense: React.FC<KategoriExpenseProps> = ({
   const [newItemAmount, setNewItemAmount] = useState(0)
 
   const total = calculateCategoryTotal(category)
-  const IconComponent = ICON_MAP[category.icon] as PhosphorIconComponent | undefined
+  const IconComponent = ICON_MAP[category.icon] ?? PackageIcon
 
   const handleAddItem = () => {
     if (newItemLabel.trim()) {
@@ -61,14 +71,14 @@ export const KategoriExpense: React.FC<KategoriExpenseProps> = ({
         <CollapsibleTrigger asChild>
           <button className="flex w-full items-center justify-between gap-3 border-b border-border bg-muted px-5 py-3 hover:bg-muted/70 transition-colors">
             <div className="flex items-center gap-3">
-              {IconComponent && <IconComponent size={20} className="text-primary" />}
+              <IconComponent size={20} className="text-primary" />
               <span className="font-semibold text-foreground">{category.name}</span>
             </div>
             <div className="flex items-center gap-3">
               {total > 0 && (
                 <span className="text-sm font-semibold text-foreground">{formatKr(total)}</span>
               )}
-              <CaretDown
+              <CaretDownIcon
                 size={16}
                 className="transition-transform duration-200"
                 style={{
@@ -121,7 +131,7 @@ export const KategoriExpense: React.FC<KategoriExpenseProps> = ({
                   onClick={handleAddItem}
                   className="gap-1"
                 >
-                  <Plus size={16} />
+                  <PlusIcon size={16} />
                   Legg til
                 </Button>
               </div>

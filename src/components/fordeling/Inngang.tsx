@@ -1,26 +1,31 @@
 import { useState } from "react"
 import { ArrowRightIcon } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { parseBeløp } from "@/lib/tall"
+import { formatKr } from "@/lib/formatering"
+import { lesUtgifterTotal } from "@/lib/utgifter-storage"
 
 interface InngangProps {
-  onStart: (lønn: number) => void
-}
-
-function parseNummer(str: string): number | null {
-  const renset = str.replace(/\s/g, "").replace(/,/g, "")
-  const tall = parseInt(renset, 10)
-  return isNaN(tall) ? null : tall
+  onStart: (lønn: number, fasteFraUtgifter: number | null) => void
 }
 
 export function Inngang({ onStart }: InngangProps) {
   const [verdi, setVerdi] = useState("")
-  const parsed = parseNummer(verdi)
+  // Har brukeren fylt ut Månedlige utgifter, foreslår vi å bruke summen derfra
+  const [utgifterTotal] = useState(lesUtgifterTotal)
+  const [brukUtgifter, setBrukUtgifter] = useState(true)
+
+  const parsed = parseBeløp(verdi)
   const gyldig = parsed !== null && parsed >= 1000
+  const utgifterPasser = utgifterTotal != null && parsed != null && utgifterTotal < parsed
 
   function handleSubmit() {
-    if (gyldig && parsed) onStart(parsed)
+    if (gyldig && parsed) {
+      onStart(parsed, brukUtgifter && utgifterPasser ? utgifterTotal : null)
+    }
   }
 
   return (
@@ -43,7 +48,6 @@ export function Inngang({ onStart }: InngangProps) {
                 id="lønn-input"
                 type="text"
                 inputMode="numeric"
-                pattern="[0-9]*"
                 placeholder="f.eks. 35 000"
                 autoComplete="off"
                 value={verdi}
@@ -58,6 +62,25 @@ export function Inngang({ onStart }: InngangProps) {
               </span>
             </div>
           </div>
+
+          {utgifterTotal != null && (
+            <label className="flex items-start gap-3 rounded-md bg-muted/50 px-3 py-2.5 text-sm cursor-pointer">
+              <Checkbox
+                checked={brukUtgifter}
+                onCheckedChange={(v) => setBrukUtgifter(v === true)}
+                className="mt-0.5"
+              />
+              <span className="text-muted-foreground leading-relaxed">
+                Bruk <strong className="text-foreground">{formatKr(utgifterTotal)}</strong>{" "}
+                fra Månedlige utgifter som faste utgifter
+                {parsed != null && !utgifterPasser && gyldig && (
+                  <span className="block text-xs mt-1">
+                    Utgiftene er høyere enn lønna, så vi bruker et anslag i stedet.
+                  </span>
+                )}
+              </span>
+            </label>
+          )}
 
           <Button onClick={handleSubmit} disabled={!gyldig} className="w-full">
             Lag plan <ArrowRightIcon data-icon="inline-end" />

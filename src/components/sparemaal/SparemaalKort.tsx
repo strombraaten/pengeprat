@@ -1,4 +1,4 @@
-import { ArrowCounterClockwise, ArrowRight, CheckCircle } from "@phosphor-icons/react"
+import { ArrowCounterClockwiseIcon, ArrowRightIcon, CheckCircleIcon } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import {
   Collapsible,
@@ -63,7 +63,7 @@ export function SparemaalKort({
                 <span className="font-semibold text-sm text-foreground">{navn}</span>
                 {bekreftet && (
                   <span className="inline-flex items-center gap-1 text-xs font-medium text-primary">
-                    <CheckCircle weight="fill" size={13} />
+                    <CheckCircleIcon weight="fill" size={13} />
                     Lagret
                   </span>
                 )}
@@ -101,7 +101,7 @@ export function SparemaalKort({
                 onClick={onSave}
               >
                 Lagre
-                <ArrowRight weight="bold" />
+                <ArrowRightIcon weight="bold" />
               </Button>
 
               {onReset && hasChanged && (
@@ -112,7 +112,7 @@ export function SparemaalKort({
                   className="w-full text-muted-foreground"
                   onClick={onReset}
                 >
-                  <ArrowCounterClockwise />
+                  <ArrowCounterClockwiseIcon />
                   Tilbakestill til forslag
                 </Button>
               )}

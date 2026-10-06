@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
@@ -9,8 +9,11 @@ import { formatKr, formaterTidshorisont, formaterTidsperiodeLang } from "@/lib/f
 import {
   beregnKrPerUke,
   beregnMånederTilMål,
+  erMålNådd,
 } from "@/lib/beregninger"
 import type { PostId, PostState } from "@/types/fordeling"
+import { parseBeløp } from "@/lib/tall"
+import { useSynketVerdi } from "@/hooks/useSynketVerdi"
 
 interface FordelingPanelProps {
   post: PostId | null
@@ -19,12 +22,6 @@ interface FordelingPanelProps {
   onClose: () => void
   onEndreMål: (id: PostId, verdi: number | null) => void
   onEndreAlleredeSpart: (id: PostId, verdi: number) => void
-}
-
-function parseNummer(str: string): number | null {
-  const renset = str.replace(/\s/g, "").replace(/,/g, "")
-  const tall = parseInt(renset, 10)
-  return isNaN(tall) ? null : tall
 }
 
 // Controlled number input that flushes to state only on blur or Enter.
@@ -40,16 +37,10 @@ function NumberInput({
   ariaLabel: string
   onChange: (ny: number | null) => void
 }) {
-  const [draft, setDraft] = useState(() => (value ? String(value) : ""))
-  const prevValue = useRef(value)
-
-  if (prevValue.current !== value) {
-    prevValue.current = value
-    setDraft(value ? String(value) : "")
-  }
+  const [draft, setDraft] = useSynketVerdi(value ? String(value) : "")
 
   function flush() {
-    const parsed = parseNummer(draft)
+    const parsed = parseBeløp(draft)
     onChange(parsed && parsed > 0 ? parsed : null)
   }
 
@@ -180,12 +171,30 @@ export function FordelingPanel({
                 </span>
               </div>
               <Progress value={spareProsent} className="h-1.5" />
-              {månederTilMål !== null && (
+              {erMålNådd(post) ? (
                 <p className="text-xs text-muted-foreground text-right">
-                  Med denne summen vil du nå målet om {formaterTidsperiodeLang(månederTilMål)}.
+                  Målet er nådd! Månedsbeløpet er flyttet til de andre
+                  sparepostene.
                 </p>
+              ) : (
+                månederTilMål !== null && (
+                  <p className="text-xs text-muted-foreground text-right">
+                    Med denne summen vil du nå målet om {formaterTidsperiodeLang(månederTilMål)}.
+                  </p>
+                )
               )}
             </div>
+          )}
+
+          {/* Målene eies av «Definer taket» — vis hvor de endres */}
+          {kat.harTidshorisont && !kat.harMålInput && (
+            <p className="text-xs text-muted-foreground">
+              Målet hentes fra{" "}
+              <a href="/sparemaal" className="underline hover:text-foreground">
+                Definer taket
+              </a>
+              , der du kan justere det.
+            </p>
           )}
 
           <Separator />

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
 import { KATEGORIER } from "@/lib/kategorier"
+import { OMRAADER } from "@/lib/omraader"
 import { formatKr } from "@/lib/formatering"
 import type { PostId, PostState } from "@/types/fordeling"
 
@@ -17,14 +18,7 @@ const OVERFØRINGS_POSTER: PostId[] = [
   "pensjon",
 ]
 
-// Account type labels shown alongside each post — defaults to "sparekonto"
-const KONTO_TYPE: Partial<Record<PostId, string>> = {
-  pensjon: "IPS (pensjonssparing)",
-  guiltFree: "forbrukskonto",
-}
-
 interface FasteTreekkProps {
-  lønn: number
   poster: Record<PostId, PostState>
   onTilbake: () => void
   onFullført: () => void
@@ -67,7 +61,7 @@ export function FasteTrekk({
           {OVERFØRINGS_POSTER.map((id) => {
             const kat = KATEGORIER.find((k) => k.id === id)!
             const post = poster[id]
-            const konto = KONTO_TYPE[id] ?? "sparekonto"
+            const konto = OMRAADER[id].konto
             const erHuketAv = huketAv[id]
 
             return (

@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Trash } from "@phosphor-icons/react"
+import { TrashIcon } from "@phosphor-icons/react"
 import type { EgetMaal } from "@/types/sparemaal"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -108,7 +108,7 @@ export function EgetMaalKort({
           className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
           onClick={() => onDelete(data.id)}
         >
-          <Trash />
+          <TrashIcon />
           Slett dette målet
         </Button>
       </div>

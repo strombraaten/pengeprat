@@ -8,7 +8,9 @@ import react from "@astrojs/react"
 export default defineConfig({
   site: "https://pengeprat.simenlager.no",
   vite: {
-    plugins: [tailwindcss()],
+    // @tailwindcss/vite bruker en nyere Vite enn Astro 5, så typene er ikke
+    // helt like. Pluginen fungerer fint — castingen skjuler bare typeavviket.
+    plugins: [/** @type {any} */ (tailwindcss())],
   },
   integrations: [react()],
 })
