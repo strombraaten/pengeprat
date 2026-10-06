@@ -139,9 +139,6 @@ testen og regelen i [produkt.md](./produkt.md).
 
 ## Kjente svakheter
 
-- De gamle vanilla-filene i rota (`index.html`, `style.css`, `favicon.*`,
-  `pengeprat/`, `uventet-sum/`) brukes ikke og kan slettes. Vercel bygger
-  bare Astro-appen.
 - Komponentene har ingen tester (bare `lib/`). Ende-til-ende-tester
   (Playwright) er et naturlig neste steg.
 - Utgifter bruker egne `type="number"`-felt og ikke `parseBeløp`.
