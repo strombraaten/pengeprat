@@ -19,6 +19,7 @@ const verktøy = [
   { href: "/fordeling", label: "Fordeling" },
   { href: "/sparemaal", label: "Definer taket" },
   { href: "/uventet-sum", label: "Uventet sum" },
+  { href: "/plan", label: "Min plan" },
 ]
 
 function erAktiv(href: string) {
@@ -47,7 +48,7 @@ function erAktiv(href: string) {
   <body class="min-h-svh flex flex-col">
 
     <!-- Top nav -->
-    <header class="sticky top-0 z-10 border-b border-border bg-card">
+    <header class="sticky top-0 z-10 border-b border-border bg-card print:hidden">
       <div class="mx-auto flex h-14 max-w-5xl items-center gap-2 px-4 sm:px-6">
         <a
           href="/"
@@ -82,7 +83,7 @@ function erAktiv(href: string) {
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-border/60 py-4">
+    <footer class="border-t border-border/60 py-4 print:hidden">
       <div class="mx-auto max-w-5xl px-4 sm:px-6">
         <p class="text-xs text-muted-foreground/60">
           Ingen innlogging, ingen sporing. Et av flere prosjekter{" "}

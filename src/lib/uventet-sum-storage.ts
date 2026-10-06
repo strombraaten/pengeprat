@@ -1,63 +1,78 @@
 import type { UventetSumKategori, UventetSumState } from "@/types/uventet-sum"
+import {
+  NØKLER,
+  erObjekt,
+  fjern,
+  ikkeNegativtTall,
+  lesJson,
+  skrivJson,
+  tekst,
+} from "@/lib/lagring"
+import { OMRAADER, ekstraFarge, type OmraadeId } from "@/lib/omraader"
 
-const STORAGE_KEY = "pengeprat_uventet_sum"
-
-// Colors match src/lib/kategorier.ts and SparemaalApp.tsx (FARGE constant)
-// for visual consistency across the app.
-const FARGER = [
-  "oklch(0.62 0.15 185)", // buffer             — teal
-  "oklch(0.65 0.14 70)",  // guiltFree          — amber
-  "oklch(0.63 0.15 30)",  // ferie              — orange
-  "oklch(0.53 0.19 295)", // storeLivshendelser — purple
-  "oklch(0.62 0.15 140)", // pensjon            — green
-  "oklch(0.61 0.19 278)", // framtidsfri        — violet
-  "oklch(0.58 0.16 250)", // extra              — blue
+// Standardkategoriene følger spareområdene (unntatt faste utgifter)
+const STANDARD_IDER: OmraadeId[] = [
+  "buffer",
+  "guiltFree",
+  "ferie",
+  "storeLivshendelser",
+  "framtidsfri",
+  "pensjon",
 ]
 
-export const DEFAULT_KATEGORIER: UventetSumKategori[] = [
-  { id: "buffer",             navn: "Buffer",              kr: 0, farge: FARGER[0] },
-  { id: "guiltFree",          navn: "Guilt-free spending", kr: 0, farge: FARGER[1] },
-  { id: "ferie",              navn: "Ferie",               kr: 0, farge: FARGER[2] },
-  { id: "storeLivshendelser", navn: "Store livshendelser", kr: 0, farge: FARGER[3] },
-  { id: "framtidsfri",        navn: "Framtidsfri",         kr: 0, farge: FARGER[5] },
-  { id: "pensjon",            navn: "Pensjon",             kr: 0, farge: FARGER[4] },
-]
+export const DEFAULT_KATEGORIER: UventetSumKategori[] = STANDARD_IDER.map((id) => ({
+  id,
+  navn: OMRAADER[id].navn,
+  kr: 0,
+  farge: OMRAADER[id].farge,
+}))
 
 export function nyttFargeFraPaletten(antallEksisterende: number): string {
-  return FARGER[antallEksisterende % FARGER.length]
+  return ekstraFarge(antallEksisterende)
 }
 
 export function klonaKategorier(): UventetSumKategori[] {
   return DEFAULT_KATEGORIER.map((k) => ({ ...k }))
 }
 
-export function loadUventetSumState(): UventetSumState {
-  try {
-    const lagret = localStorage.getItem(STORAGE_KEY)
-    if (lagret) {
-      const data = JSON.parse(lagret) as UventetSumState
-      // Migration: old format used prosent+locked instead of kr — reset to defaults
-      if (data.kategorier?.[0] && "prosent" in (data.kategorier[0] as Record<string, unknown>)) {
-        return { beløp: 0, kategorier: klonaKategorier() }
-      }
-      return data
-    }
-  } catch {
-    // Corrupt storage — fall through to defaults
-  }
+function standardState(): UventetSumState {
   return { beløp: 0, kategorier: klonaKategorier() }
 }
 
+export function tolkUventetSum(rå: unknown): UventetSumState {
+  if (!erObjekt(rå) || !Array.isArray(rå.kategorier)) return standardState()
+
+  // Gammelt format brukte prosent+locked i stedet for kr — start på nytt
+  if (rå.kategorier.some((k) => erObjekt(k) && "prosent" in k)) return standardState()
+
+  const beløp = ikkeNegativtTall(rå.beløp, 0)
+  const kategorier: UventetSumKategori[] = rå.kategorier
+    .filter(erObjekt)
+    .filter((k) => typeof k.id === "string")
+    .map((k, i) => ({
+      id: k.id as string,
+      navn: tekst(k.navn, ""),
+      kr: ikkeNegativtTall(k.kr, 0),
+      farge: tekst(k.farge, ekstraFarge(i)),
+    }))
+
+  if (kategorier.length === 0) return standardState()
+
+  // Summen kan aldri overstige beløpet — nullstill fordelingen hvis den gjør det
+  const sum = kategorier.reduce((s, k) => s + k.kr, 0)
+  if (sum > beløp) return { beløp, kategorier: kategorier.map((k) => ({ ...k, kr: 0 })) }
+
+  return { beløp, kategorier }
+}
+
+export function loadUventetSumState(): UventetSumState {
+  return tolkUventetSum(lesJson(NØKLER.uventetSum))
+}
+
 export function saveUventetSumState(state: UventetSumState): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-  } catch {
-    // Storage full or unavailable — silently ignore
-  }
+  skrivJson(NØKLER.uventetSum, state)
 }
 
 export function clearUventetSumState(): void {
-  try {
-    localStorage.removeItem(STORAGE_KEY)
-  } catch {}
+  fjern(NØKLER.uventetSum)
 }

@@ -1,5 +1,6 @@
 import type React from "react"
-import { formatKr, calculateGrandTotal } from "@/lib/utgifter-utils"
+import { calculateGrandTotal } from "@/lib/utgifter-utils"
+import { formatKr } from "@/lib/formatering"
 import type { ExpenseCategory } from "@/types/utgifter"
 
 interface UtgifterHeaderProps {

@@ -1,4 +1,5 @@
 import type { ExpenseCategory } from "@/types/utgifter"
+import { formatKr } from "@/lib/formatering"
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Calculation Functions
@@ -31,14 +32,6 @@ export function calculatePercentage(amount: number, total: number): number {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /**
- * Format a number as Norwegian currency (kr)
- */
-export function formatKr(amount: number): string {
-  if (amount === 0) return "0 kr"
-  return amount.toLocaleString("no-NO") + " kr"
-}
-
-/**
  * Format annual amount
  */
 export function formatAnnual(monthlyAmount: number): string {
@@ -62,11 +55,4 @@ export function getCategoriesWithData(
     }))
     .filter((cat) => cat.total > 0)
     .sort((a, b) => b.total - a.total)
-}
-
-/**
- * Deep clone of an object (for immutable updates)
- */
-export function deepClone<T>(obj: T): T {
-  return JSON.parse(JSON.stringify(obj)) as T
 }

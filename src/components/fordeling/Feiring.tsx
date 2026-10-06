@@ -30,16 +30,19 @@ export function Feiring({ onTilbakeTilPlan }: FeiringProps) {
         </div>
 
         <div className="flex flex-col gap-2">
+          <Button asChild className="w-full">
+            <a href="/plan">Se hele planen din</a>
+          </Button>
+          <Button asChild variant="outline" className="w-full">
+            <a href="/sparemaal">Neste steg: Definer taket for sparemålene</a>
+          </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={onTilbakeTilPlan}
             className="text-muted-foreground"
           >
-            <ArrowLeftIcon data-icon="inline-start" /> Tilbake til planen
-          </Button>
-          <Button asChild className="w-full">
-            <a href="/">Gå til alle verktøyene</a>
+            <ArrowLeftIcon data-icon="inline-start" /> Tilbake til fordelingen
           </Button>
         </div>
 

@@ -1,81 +1,50 @@
 import { useState } from "react"
-import { ArrowLeft, ArrowSquareOut, Plus } from "@phosphor-icons/react"
+import { ArrowLeftIcon, ArrowSquareOutIcon, PlusIcon } from "@phosphor-icons/react"
 import type { EgetMaal, LivehendelsesEntry, SparemaalEntry, SparemaalState } from "@/types/sparemaal"
-import { loadSparemaalState, saveSparemaalState } from "@/lib/sparemaal-storage"
+import {
+  beregnForslag,
+  BUFFER_FALLBACK,
+  loadSparemaalState,
+  saveSparemaalState,
+} from "@/lib/sparemaal-storage"
+import { FERIE_MÅL } from "@/lib/beregninger"
+import { ekstraFarge, OMRAADER } from "@/lib/omraader"
+import { loadState as lastFordeling } from "@/lib/fordeling-storage"
 import { Button } from "@/components/ui/button"
 import { SparemaalKort } from "./SparemaalKort"
 import { SparemaalBelopInput } from "./SparemaalBelopInput"
 import { LivshendelsesKort } from "./LivshendelsesKort"
 import { EgetMaalKort } from "./EgetMaalKort"
 
-// --- Colors from kategorier.ts + framtidsfri (new category) ---
+// Farger fra de felles spareområdene (lib/omraader.ts)
 const FARGE = {
-  buffer: "oklch(0.62 0.15 185)",
-  ferie: "oklch(0.63 0.15 30)",
-  framtidsfri: "oklch(0.61 0.19 278)",
-  storeLivshendelser: "oklch(0.53 0.19 295)",
-  pensjon: "oklch(0.62 0.15 140)",
+  buffer: OMRAADER.buffer.farge,
+  ferie: OMRAADER.ferie.farge,
+  framtidsfri: OMRAADER.framtidsfri.farge,
+  storeLivshendelser: OMRAADER.storeLivshendelser.farge,
+  pensjon: OMRAADER.pensjon.farge,
 }
-
-// Palette for user-defined goals (rotates)
-const EGNE_FARGER = [
-  "oklch(0.65 0.14 70)",
-  "oklch(0.60 0.18 320)",
-  "oklch(0.65 0.15 200)",
-  "oklch(0.62 0.16 15)",
-  "oklch(0.66 0.12 100)",
-]
 
 // Ordered list of fixed card IDs (excluding egne + pensjon)
 const KORT_REKKEFOLGE = ["buffer", "ferie", "framtidsfri", "storeLivshendelser"] as const
-
-function buildSSRState(): SparemaalState {
-  return {
-    buffer: { mål: 82_500, bekreftet: false },
-    ferie: { mål: 15_000, bekreftet: false },
-    framtidsfri: { mål: 210_000, bekreftet: false },
-    storeLivshendelser: { type: "Bil", mål: null, bekreftet: false },
-    egne: [],
-  }
-}
-
-/** Read fordeling state to get personalized defaults for buffer and framtidsfri */
-function readSuggestions(): { buffer: number; framtidsfri: number } {
-  try {
-    const raw = localStorage.getItem("pengeprat_v2")
-    if (!raw) return { buffer: 82_500, framtidsfri: 210_000 }
-    const parsed = JSON.parse(raw)
-    const lønn: number | null = parsed?.lønn ?? null
-    const faste: number = parsed?.poster?.fasteUtgifter?.månedlig ?? 0
-    return {
-      buffer: lønn ? Math.round(lønn * 1.5) : 82_500,
-      framtidsfri: faste > 0 ? Math.round(faste * 6) : 210_000,
-    }
-  } catch {
-    return { buffer: 82_500, framtidsfri: 210_000 }
-  }
-}
 
 /**
  * Root component for the Sparemål tool.
  * Renders accordion cards for each savings goal in priority order.
  */
 export function SparemaalApp() {
-  const [state, setState] = useState<SparemaalState>(() => {
-    if (typeof window === "undefined") return buildSSRState()
-    return loadSparemaalState()
-  })
+  const [state, setState] = useState<SparemaalState>(loadSparemaalState)
 
   // Suggestions computed once at mount (for "Tilbakestill til forslag")
-  const [suggestions] = useState<{ buffer: number; framtidsfri: number }>(() => {
-    if (typeof window === "undefined") return { buffer: 82_500, framtidsfri: 210_000 }
-    return readSuggestions()
-  })
+  const [suggestions] = useState(beregnForslag)
+  // Faste utgifter fra Fordeling — forklarer hvor framtidsfri-forslaget kommer fra
+  const [fasteUtgifter] = useState(
+    () => lastFordeling()?.poster.fasteUtgifter.månedlig ?? null
+  )
 
   // One open card at a time — start with first unconfirmed, else buffer
   const [openId, setOpenId] = useState<string>(() => {
-    if (typeof window === "undefined") return "buffer"
-    const s = loadSparemaalState()
+    const s = state
     const first = KORT_REKKEFOLGE.find((id) => !s[id].bekreftet)
     if (first) return first
     const firstEget = s.egne.find((e) => !e.bekreftet)
@@ -160,7 +129,7 @@ export function SparemaalApp() {
 
   function addEget() {
     const id = `eget-${Date.now()}`
-    const farge = EGNE_FARGER[state.egne.length % EGNE_FARGER.length]
+    const farge = ekstraFarge(state.egne.length + 1)
     const nytt: EgetMaal = {
       id,
       navn: "",
@@ -189,7 +158,7 @@ export function SparemaalApp() {
         href="/"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-1"
       >
-        <ArrowLeft size={15} />
+        <ArrowLeftIcon size={15} />
         Pengeprat
       </a>
 
@@ -226,7 +195,7 @@ export function SparemaalApp() {
         isOpen={openId === "ferie"}
         onToggle={() => toggle("ferie")}
         onSave={(mål) => saveEntry("ferie", mål)}
-        onReset={() => resetEntry("ferie", 15_000)}
+        onReset={() => resetEntry("ferie", FERIE_MÅL)}
       />
 
       {/* 3. Framtidsfri */}
@@ -234,6 +203,7 @@ export function SparemaalApp() {
         farge={FARGE.framtidsfri}
         entry={state.framtidsfri}
         suggestion={suggestions.framtidsfri}
+        fasteUtgifter={fasteUtgifter}
         isOpen={openId === "framtidsfri"}
         onToggle={() => toggle("framtidsfri")}
         onSave={(mål) => saveEntry("framtidsfri", mål)}
@@ -271,9 +241,22 @@ export function SparemaalApp() {
         className="w-full mt-6"
         onClick={addEget}
       >
-        <Plus />
+        <PlusIcon />
         Legg til eget mål
       </Button>
+
+      {/* Neste steg: målene brukes i Fordeling og samles i planen */}
+      <p className="text-xs text-muted-foreground mt-4">
+        Målene du lagrer her brukes i{" "}
+        <a href="/fordeling" className="underline hover:text-foreground">
+          Fordeling
+        </a>{" "}
+        til å regne ut når du er ferdig spart, og samles i{" "}
+        <a href="/plan" className="underline hover:text-foreground">
+          planen din
+        </a>
+        .
+      </p>
     </div>
   )
 }
@@ -322,6 +305,7 @@ function BufferKort({
       <div className="rounded-md bg-muted px-3 py-2.5 text-xs text-muted-foreground leading-relaxed">
         Vi foreslår{" "}
         <strong className="text-foreground">1,5 × månedsinntekten din = {suggestion.toLocaleString("nb-NO")} kr</strong>.
+        {suggestion === BUFFER_FALLBACK && " (Lag en plan i Fordeling for å få et forslag basert på din lønn.)"}
         {" "}Det dekker de fleste uventede utgifter for en gjennomsnittlig husholdning.
       </div>
       <SparemaalBelopInput
@@ -353,7 +337,7 @@ function FerieKort({
   onReset: () => void
 }) {
   const [mål, setMål] = useState<number | null>(entry.mål)
-  const DEFAULT_FERIE = 15_000
+  const DEFAULT_FERIE = FERIE_MÅL
 
   return (
     <SparemaalKort
@@ -392,6 +376,7 @@ function FramtidsfriKort({
   farge,
   entry,
   suggestion,
+  fasteUtgifter,
   isOpen,
   onToggle,
   onSave,
@@ -400,6 +385,7 @@ function FramtidsfriKort({
   farge: string
   entry: SparemaalEntry
   suggestion: number
+  fasteUtgifter: number | null
   isOpen: boolean
   onToggle: () => void
   onSave: (mål: number | null) => void
@@ -436,7 +422,9 @@ function FramtidsfriKort({
         ariaLabel="Framtidsfri-mål i kroner"
       />
       <p className="text-xs text-muted-foreground">
-        Basert på 35 000 kr/mnd i faste utgifter. Vil du ha et helt år fri? Sett 420 000 kr.
+        {fasteUtgifter
+          ? `Basert på ${fasteUtgifter.toLocaleString("nb-NO")} kr/mnd i faste utgifter fra Fordeling. Vil du ha et helt år fri? Sett ${(suggestion * 2).toLocaleString("nb-NO")} kr.`
+          : `Vi har antatt 35 000 kr/mnd i faste utgifter. Lag en plan i Fordeling for å få et forslag basert på dine tall.`}
       </p>
     </SparemaalKort>
   )
@@ -472,7 +460,7 @@ function PensjonKort({ farge }: { farge: string }) {
             rel="noopener noreferrer"
           >
             Pensjonskalkulator
-            <ArrowSquareOut />
+            <ArrowSquareOutIcon />
           </a>
         </Button>
       </div>

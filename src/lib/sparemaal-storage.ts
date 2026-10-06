@@ -1,90 +1,140 @@
-import type { SparemaalState } from "@/types/sparemaal"
+import type {
+  EgetMaal,
+  LivehendelsesType,
+  SparemaalEntry,
+  SparemaalState,
+} from "@/types/sparemaal"
+import { beregnBufferMål, beregnFramtidsfriMål, FERIE_MÅL } from "@/lib/beregninger"
+import { loadState as lastFordeling } from "@/lib/fordeling-storage"
+import {
+  NØKLER,
+  erObjekt,
+  fjern,
+  lesJson,
+  positivtTallEllerNull,
+  skrivJson,
+  tekst,
+} from "@/lib/lagring"
+import { ekstraFarge } from "@/lib/omraader"
 
-const STORAGE_KEY = "pengeprat_sparemaal_v1"
-const FORDELING_KEY = "pengeprat_v2"
+// «Definer taket» eier sparemålene. Fordeling leser og skriver målene herfra,
+// slik at brukeren bare har ett tall per mål. Se docs/produkt.md#mål.
 
-// Fallback defaults when fordeling-data is unavailable
-const BUFFER_FALLBACK = 82_500
-const FRAMTIDSFRI_FALLBACK = 210_000
-const FERIE_DEFAULT = 15_000
+// Brukes når vi ikke vet noe om brukerens lønn eller utgifter
+export const BUFFER_FALLBACK = 82_500
+export const FRAMTIDSFRI_FALLBACK = 210_000
 
-/** Read lønn and fasteUtgifter from the fordeling state to compute smarter defaults. */
-function readFordelingDefaults(): { buffer: number; framtidsfri: number } {
-  try {
-    const raw = localStorage.getItem(FORDELING_KEY)
-    if (!raw) return { buffer: BUFFER_FALLBACK, framtidsfri: FRAMTIDSFRI_FALLBACK }
+/** Mål som deles mellom Fordeling og Definer taket. */
+export type DeltMålId = "buffer" | "ferie" | "storeLivshendelser"
 
-    const parsed = JSON.parse(raw)
-    const lønn: number | null = parsed?.lønn ?? null
-    const fasteUtgifter: number = parsed?.poster?.fasteUtgifter?.månedlig ?? 0
+const LIVSHENDELSE_TYPER: LivehendelsesType[] = ["Bil", "Bryllup", "Egenkapital", "Annet"]
 
-    return {
-      buffer: lønn ? Math.round(lønn * 1.5) : BUFFER_FALLBACK,
-      framtidsfri: fasteUtgifter > 0 ? Math.round(fasteUtgifter * 6) : FRAMTIDSFRI_FALLBACK,
-    }
-  } catch {
-    return { buffer: BUFFER_FALLBACK, framtidsfri: FRAMTIDSFRI_FALLBACK }
+/**
+ * Forslag til mål regnet ut fra Fordeling (lønn og faste utgifter).
+ * Brukes som utgangspunkt og for «Tilbakestill til forslag».
+ */
+export function beregnForslag(): { buffer: number; framtidsfri: number } {
+  const fordeling = lastFordeling()
+  const lønn = fordeling?.lønn ?? null
+  const faste = fordeling?.poster.fasteUtgifter.månedlig ?? 0
+  return {
+    buffer: lønn ? beregnBufferMål(lønn) : BUFFER_FALLBACK,
+    framtidsfri: faste > 0 ? beregnFramtidsfriMål(faste) : FRAMTIDSFRI_FALLBACK,
   }
 }
 
-function buildDefaultState(): SparemaalState {
-  const { buffer, framtidsfri } = readFordelingDefaults()
+function standardState(): SparemaalState {
+  const forslag = beregnForslag()
+  // Har brukeren satt mål i Fordeling før, starter vi fra dem
+  const fordeling = lastFordeling()
+  const fraFordeling = (id: DeltMålId) => fordeling?.poster[id].mål ?? null
   return {
-    buffer: { mål: buffer, bekreftet: false },
-    ferie: { mål: FERIE_DEFAULT, bekreftet: false },
-    framtidsfri: { mål: framtidsfri, bekreftet: false },
-    storeLivshendelser: { type: "Bil", mål: null, bekreftet: false },
+    buffer: { mål: fraFordeling("buffer") ?? forslag.buffer, bekreftet: false },
+    ferie: { mål: fraFordeling("ferie") ?? FERIE_MÅL, bekreftet: false },
+    framtidsfri: { mål: forslag.framtidsfri, bekreftet: false },
+    storeLivshendelser: {
+      type: "Bil",
+      mål: fraFordeling("storeLivshendelser"),
+      bekreftet: false,
+    },
     egne: [],
   }
 }
 
-export function loadSparemaalState(): SparemaalState {
-  const defaults = buildDefaultState()
-
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return defaults
-
-    const parsed = JSON.parse(raw) as Partial<SparemaalState>
-    if (!parsed || typeof parsed !== "object") return defaults
-
-    // Merge saved data over defaults — new fields in future versions get default values
-    const state = structuredClone(defaults)
-
-    if (parsed.buffer && typeof parsed.buffer === "object") {
-      Object.assign(state.buffer, parsed.buffer)
-    }
-    if (parsed.ferie && typeof parsed.ferie === "object") {
-      Object.assign(state.ferie, parsed.ferie)
-    }
-    if (parsed.framtidsfri && typeof parsed.framtidsfri === "object") {
-      Object.assign(state.framtidsfri, parsed.framtidsfri)
-    }
-    if (parsed.storeLivshendelser && typeof parsed.storeLivshendelser === "object") {
-      Object.assign(state.storeLivshendelser, parsed.storeLivshendelser)
-    }
-    if (Array.isArray(parsed.egne)) {
-      state.egne = parsed.egne
-    }
-
-    return state
-  } catch {
-    return defaults
+function tolkEntry(rå: unknown, standard: SparemaalEntry): SparemaalEntry {
+  if (!erObjekt(rå)) return standard
+  return {
+    mål: "mål" in rå ? positivtTallEllerNull(rå.mål) : standard.mål,
+    bekreftet: rå.bekreftet === true,
   }
+}
+
+function tolkEget(rå: unknown, indeks: number): EgetMaal | null {
+  if (!erObjekt(rå) || typeof rå.id !== "string") return null
+  return {
+    id: rå.id,
+    navn: tekst(rå.navn, ""),
+    ...(typeof rå.beskrivelse === "string" ? { beskrivelse: rå.beskrivelse } : {}),
+    mål: positivtTallEllerNull(rå.mål),
+    farge: tekst(rå.farge, ekstraFarge(indeks)),
+    bekreftet: rå.bekreftet === true,
+  }
+}
+
+export function tolkSparemaal(rå: unknown): SparemaalState {
+  const standard = standardState()
+  if (!erObjekt(rå)) return standard
+
+  const livs = erObjekt(rå.storeLivshendelser) ? rå.storeLivshendelser : {}
+  const type = LIVSHENDELSE_TYPER.includes(livs.type as LivehendelsesType)
+    ? (livs.type as LivehendelsesType)
+    : standard.storeLivshendelser.type
+
+  return {
+    buffer: tolkEntry(rå.buffer, standard.buffer),
+    ferie: tolkEntry(rå.ferie, standard.ferie),
+    framtidsfri: tolkEntry(rå.framtidsfri, standard.framtidsfri),
+    storeLivshendelser: {
+      ...tolkEntry(rå.storeLivshendelser, standard.storeLivshendelser),
+      type,
+    },
+    egne: Array.isArray(rå.egne)
+      ? rå.egne.map(tolkEget).filter((e): e is EgetMaal => e !== null)
+      : [],
+  }
+}
+
+export function loadSparemaalState(): SparemaalState {
+  return tolkSparemaal(lesJson(NØKLER.sparemaal))
 }
 
 export function saveSparemaalState(state: SparemaalState): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-  } catch {
-    // localStorage unavailable — continue without saving
-  }
+  skrivJson(NØKLER.sparemaal, state)
 }
 
 export function clearSparemaalState(): void {
-  try {
-    localStorage.removeItem(STORAGE_KEY)
-  } catch {
-    // ignore
+  fjern(NØKLER.sparemaal)
+}
+
+/** Bekreftede mål fra Definer taket. Ubekreftede mål er bare forslag og tas ikke med. */
+export function lesBekreftedeMål(): Partial<Record<DeltMålId, number | null>> {
+  const rå = lesJson(NØKLER.sparemaal)
+  if (!erObjekt(rå)) return {}
+  const state = tolkSparemaal(rå)
+  const ut: Partial<Record<DeltMålId, number | null>> = {}
+  for (const id of ["buffer", "ferie", "storeLivshendelser"] as const) {
+    if (state[id].bekreftet) ut[id] = state[id].mål
   }
+  return ut
+}
+
+/** Når brukeren endrer et mål i Fordeling, lagres det som bekreftet mål her. */
+export function lagreMålFraFordeling(id: DeltMålId, mål: number | null): void {
+  const state = loadSparemaalState()
+  if (id === "storeLivshendelser") {
+    state.storeLivshendelser = { ...state.storeLivshendelser, mål, bekreftet: true }
+  } else {
+    state[id] = { ...state[id], mål, bekreftet: true }
+  }
+  saveSparemaalState(state)
 }

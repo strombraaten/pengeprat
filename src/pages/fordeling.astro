@@ -1,5 +1,6 @@
 ---
 import AppLayout from "@/layouts/app.astro"
+import Laster from "@/components/Laster.astro"
 import { FordelingApp } from "@/components/fordeling/FordelingApp"
 ---
 
@@ -7,5 +8,7 @@ import { FordelingApp } from "@/components/fordeling/FordelingApp"
   title="Fordeling — Pengeprat"
   description="Finn ut hvordan du kan fordele månedslønnen din."
 >
-  <FordelingApp client:load />
+  <FordelingApp client:only="react">
+    <Laster slot="fallback" />
+  </FordelingApp>
 </AppLayout>

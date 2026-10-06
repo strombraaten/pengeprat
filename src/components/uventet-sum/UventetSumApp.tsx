@@ -1,5 +1,12 @@
 import { useRef, useState } from "react"
-import { ArrowCounterClockwiseIcon, ArrowRightIcon, CheckCircle, PlusIcon, TrashIcon } from "@phosphor-icons/react"
+import {
+  ArrowCounterClockwiseIcon,
+  ArrowRightIcon,
+  CheckCircleIcon,
+  LightbulbIcon,
+  PlusIcon,
+  TrashIcon,
+} from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
@@ -7,19 +14,20 @@ import { Separator } from "@/components/ui/separator"
 import { formatKr } from "@/lib/formatering"
 import { useUventetSumState } from "@/hooks/useUventetSumState"
 import type { UventetSumKategori } from "@/types/uventet-sum"
+import { foreslåUventetFordeling, lesPlan } from "@/lib/plan"
+import { avrundTil, parseBeløp as parseTall } from "@/lib/tall"
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
+// Tomt eller ugyldig felt tolkes som 0
 function parseBeløp(str: string): number {
-  const renset = str.replace(/\s/g, "").replace(/,/g, "")
-  const tall = parseInt(renset, 10)
-  return isNaN(tall) || tall < 0 ? 0 : tall
+  return parseTall(str) ?? 0
 }
 
 function avrundTilNærmeste100(n: number): number {
-  return Math.round(n / 100) * 100
+  return avrundTil(n, 100)
 }
 
 // ---------------------------------------------------------------------------
@@ -99,7 +107,7 @@ function TilgjengeligDisplay({ tilgjengeligKr, beløp }: TilgjengeligDisplayProp
   if (altFordelt) {
     return (
       <div className="flex items-center gap-2.5 rounded-lg bg-[oklch(0.62_0.15_140)]/10 px-4 py-3">
-        <CheckCircle size={18} className="shrink-0 text-[oklch(0.62_0.15_140)]" />
+        <CheckCircleIcon size={18} className="shrink-0 text-[oklch(0.62_0.15_140)]" />
         <div>
           <p className="text-sm font-medium text-foreground">Alt er fordelt</p>
           <p className="text-xs text-muted-foreground">
@@ -152,8 +160,8 @@ function KategoriRad({
   }
 
   function commitRedigering() {
-    const parsed = parseInt(draft.replace(/\s/g, "").replace(/,/g, ""), 10)
-    if (!isNaN(parsed) && parsed >= 0) {
+    const parsed = parseTall(draft)
+    if (parsed !== null) {
       onEndreKr(kategori.id, avrundTilNærmeste100(Math.min(parsed, beløp)))
     }
     setRedigerer(false)
@@ -253,7 +261,18 @@ export function UventetSumApp() {
     leggTilKategori,
     fjernKategori,
     nullstillFordeling,
+    brukForslag,
   } = useUventetSumState()
+
+  // Forslaget bygger på planen fra de andre stegene (sparemål og hva du har spart)
+  const [plan] = useState(lesPlan)
+  const [begrunnelse, setBegrunnelse] = useState<string[] | null>(null)
+
+  function foreslå() {
+    const forslag = foreslåUventetFordeling(state.beløp, plan)
+    brukForslag(forslag.kr)
+    setBegrunnelse(forslag.begrunnelse)
+  }
 
   const [beløpDraft, setBeløpDraft] = useState(
     state.beløp > 0 ? String(state.beløp) : ""
@@ -269,6 +288,7 @@ export function UventetSumApp() {
     const rundet = parsed > 0 ? avrundTilNærmeste100(parsed) : 0
     setBeløp(rundet)
     setBeløpDraft(rundet > 0 ? String(rundet) : "")
+    setBegrunnelse(null)
   }
 
   return (
@@ -336,6 +356,28 @@ export function UventetSumApp() {
           {/* Available-funds display */}
           <TilgjengeligDisplay tilgjengeligKr={tilgjengeligKr} beløp={state.beløp} />
 
+          {/* Forslag basert på planen — brukeren kan justere etterpå */}
+          <div className="space-y-2 rounded-lg border border-border px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-sm text-muted-foreground">
+                {plan.steg.fordeling || plan.steg.sparemaal
+                  ? "Vil du ha et forslag basert på sparemålene dine?"
+                  : "Vil du ha et forslag? Det blir bedre når du har laget en plan."}
+              </p>
+              <Button size="sm" variant="outline" onClick={foreslå} className="gap-1.5">
+                <LightbulbIcon size={14} />
+                Foreslå fordeling
+              </Button>
+            </div>
+            {begrunnelse && (
+              <ul className="list-disc space-y-0.5 pl-5 text-xs text-muted-foreground">
+                {begrunnelse.map((b) => (
+                  <li key={b}>{b}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+
           {/* Distribution bar + reset */}
           <div className="space-y-2">
             <FordelingsBar
@@ -346,7 +388,10 @@ export function UventetSumApp() {
             <Button
               variant="outline"
               size="sm"
-              onClick={nullstillFordeling}
+              onClick={() => {
+                nullstillFordeling()
+                setBegrunnelse(null)
+              }}
               className="gap-1.5"
             >
               <ArrowCounterClockwiseIcon size={13} />

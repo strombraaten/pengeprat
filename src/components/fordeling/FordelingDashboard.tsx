@@ -1,7 +1,10 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { formatKr } from "@/lib/formatering"
+import { parseBeløp } from "@/lib/tall"
+import { lesUtgifterTotal } from "@/lib/utgifter-storage"
 import { FordelingBar } from "./FordelingBar"
 import { FordelingTabell } from "./FordelingTabell"
 import { FordelingPanel } from "./FordelingPanel"
@@ -15,7 +18,7 @@ interface FordelingDashboardProps {
   onEndreAlleredeSpart: (postId: PostId, verdi: number) => void
   onEndreMål: (postId: PostId, verdi: number | null) => void
   onTilbakestill: () => void
-  onEndreLønn: () => void
+  onEndreLønn: (nyLønn: number) => void
   onBekreft: () => void
 }
 
@@ -33,6 +36,13 @@ export function FordelingDashboard({
   // Local UI state — which category's side panel is open.
   // Not persisted: resetting to null when user navigates away is correct behavior.
   const [activePost, setActivePost] = useState<PostId | null>(null)
+  const [redigererLønn, setRedigererLønn] = useState(false)
+
+  // Kobling til Månedlige utgifter: foreslå summen derfra hvis den avviker
+  const [utgifterTotal] = useState(lesUtgifterTotal)
+  const fasteNå = poster.fasteUtgifter.månedlig
+  const visUtgifterForslag =
+    utgifterTotal != null && utgifterTotal < lønn && utgifterTotal !== fasteNå
 
   return (
     <TooltipProvider>
@@ -47,21 +57,49 @@ export function FordelingDashboard({
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
               Fordeling
             </p>
-            <div className="flex items-baseline gap-3 flex-wrap">
-              <span className="text-3xl font-extrabold tabular-nums">
-                {formatKr(lønn)}
-              </span>
-              <span className="text-sm text-muted-foreground">/ mnd</span>
+            {redigererLønn ? (
+              <LønnRedigering
+                lønn={lønn}
+                onLagre={(ny) => {
+                  onEndreLønn(ny)
+                  setRedigererLønn(false)
+                }}
+                onAvbryt={() => setRedigererLønn(false)}
+              />
+            ) : (
+              <div className="flex items-baseline gap-3 flex-wrap">
+                <span className="text-3xl font-extrabold tabular-nums">
+                  {formatKr(lønn)}
+                </span>
+                <span className="text-sm text-muted-foreground">/ mnd</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setRedigererLønn(true)}
+                  className="ml-auto lg:ml-0"
+                >
+                  Endre lønn
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {visUtgifterForslag && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm">
+              <p className="text-muted-foreground">
+                I Månedlige utgifter har du lagt inn{" "}
+                <strong className="text-foreground">{formatKr(utgifterTotal)}</strong>,
+                men her står det {formatKr(fasteNå)}.
+              </p>
               <Button
-                variant="outline"
                 size="sm"
-                onClick={onEndreLønn}
-                className="ml-auto lg:ml-0"
+                variant="outline"
+                onClick={() => onEndreFasteUtgifter(utgifterTotal!)}
               >
-                Endre lønn
+                Bruk {formatKr(utgifterTotal)}
               </Button>
             </div>
-          </div>
+          )}
 
           {/* Distribution bar — segments clickable to open/close side panel */}
           <FordelingBar
@@ -98,5 +136,56 @@ export function FordelingDashboard({
 
       </div>
     </TooltipProvider>
+  )
+}
+
+// Lønn redigeres direkte i oversikten. Mål, «allerede spart» og faste
+// utgifter du har satt selv beholdes (se tilpassTilNyLønn i beregninger.ts).
+function LønnRedigering({
+  lønn,
+  onLagre,
+  onAvbryt,
+}: {
+  lønn: number
+  onLagre: (ny: number) => void
+  onAvbryt: () => void
+}) {
+  const [draft, setDraft] = useState(String(lønn))
+  const parsed = parseBeløp(draft)
+  const gyldig = parsed !== null && parsed >= 1000
+
+  return (
+    <form
+      className="flex flex-wrap items-center gap-2"
+      onSubmit={(e) => {
+        e.preventDefault()
+        if (gyldig) onLagre(parsed)
+      }}
+    >
+      <div className="relative w-40">
+        <Input
+          autoFocus
+          type="text"
+          inputMode="numeric"
+          autoComplete="off"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") onAvbryt()
+          }}
+          className="pr-10 text-lg font-bold tabular-nums"
+          aria-label="Månedslønn etter skatt"
+        />
+        <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm text-muted-foreground">
+          kr
+        </span>
+      </div>
+      <Button type="submit" size="sm" disabled={!gyldig}>
+        Lagre
+      </Button>
+      <Button type="button" size="sm" variant="ghost" onClick={onAvbryt}>
+        Avbryt
+      </Button>
+    </form>
   )
 }

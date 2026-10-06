@@ -14,6 +14,7 @@ export type PhosphorIconName =
   | "ShoppingCart"
   | "Smiley"
   | "Baby"
+  | "Package"
 
 // ─── Expense Item ──────────────────────────────────────────────────────────────
 
@@ -39,30 +40,14 @@ export interface UtgifterState {
   categories: ExpenseCategory[]
   expandedCategories: CategoryId[]
   selectedPreset: PresetKey | null
-}
-
-// ─── Context value (passed to components via props) ──────────────────────────
-
-export interface UtgifterContextValue extends UtgifterState {
-  updateAmount: (categoryId: CategoryId, itemId: ExpenseItemId, amount: number) => void
-  addItem: (categoryId: CategoryId, label: string, amount: number) => void
-  removeItem: (categoryId: CategoryId, itemId: ExpenseItemId) => void
-  loadPreset: (presetKey: PresetKey) => void
-  toggleExpanded: (categoryId: CategoryId) => void
-}
-
-// Legacy state shape (pre-migration)
-export interface LegacyUtgifterState {
-  categories: ExpenseCategory[]
-  expandedCategory?: CategoryId | null
-  expandedCategories?: CategoryId[]
-  selectedPreset: PresetKey | null
+  /** true når brukeren har endret tallene (eksempeltallene teller ikke som brukerdata). */
+  endret: boolean
+  /** Standardposter brukeren har sett — slik at slettede poster ikke dukker opp igjen. */
+  kjenteStandardposter: ExpenseItemId[]
 }
 
 // ─── Preset Configuration ──────────────────────────────────────────────────────
 
 export type PresetConfig = Record<ExpenseItemId, number>
 
-export interface Presets {
-  [key in PresetKey]: PresetConfig
-}
+export type Presets = Record<PresetKey, PresetConfig>

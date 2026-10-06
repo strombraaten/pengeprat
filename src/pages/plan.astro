@@ -1,0 +1,14 @@
+---
+import AppLayout from "@/layouts/app.astro"
+import Laster from "@/components/Laster.astro"
+import { PlanApp } from "@/components/plan/PlanApp"
+---
+
+<AppLayout
+  title="Min plan — Pengeprat"
+  description="Planen din samlet på ett sted: faste trekk, sparemål og når du er i mål."
+>
+  <PlanApp client:only="react">
+    <Laster slot="fallback" />
+  </PlanApp>
+</AppLayout>

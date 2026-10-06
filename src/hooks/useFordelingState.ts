@@ -1,31 +1,40 @@
 import { useCallback, useEffect, useState } from "react"
-import type {
-  FordelingViewState,
-  PostId,
-  ViewId,
-} from "@/types/fordeling"
+import type { FordelingState, FordelingViewState, PostId, ViewId } from "@/types/fordeling"
 import {
   beregnBufferMål,
-  beregnStandardfordeling,
+  erMålNådd,
   fordelLikt,
+  frigjørPost,
+  lagForslag,
   omfordelEtterFasteUtgifter,
+  tilpassTilNyLønn,
 } from "@/lib/beregninger"
-import { clearState, getDefaultState, loadState, saveState } from "@/lib/storage"
+import { clearState, getDefaultState, loadState, saveState } from "@/lib/fordeling-storage"
+import {
+  lagreMålFraFordeling,
+  lesBekreftedeMål,
+  type DeltMålId,
+} from "@/lib/sparemaal-storage"
+import { lesUtgifterTotal } from "@/lib/utgifter-storage"
+
+const DELTE_MÅL: DeltMålId[] = ["buffer", "ferie", "storeLivshendelser"]
+
+/** Mål bekreftet i «Definer taket» går foran målene som er lagret i Fordeling. */
+function medBekreftedeMål(state: FordelingState): FordelingState {
+  const bekreftede = lesBekreftedeMål()
+  const poster = structuredClone(state.poster)
+  for (const id of DELTE_MÅL) {
+    if (id in bekreftede) poster[id].mål = bekreftede[id] ?? null
+  }
+  return { ...state, poster }
+}
 
 function createInitialViewState(): FordelingViewState {
   const saved = loadState()
   if (saved && saved.lønn) {
-    return {
-      ...saved,
-      view: "dashboard",
-      expandedPost: null,
-    }
+    return { ...medBekreftedeMål(saved), view: "dashboard", expandedPost: null }
   }
-  return {
-    ...getDefaultState(),
-    view: "inngang",
-    expandedPost: null,
-  }
+  return { ...medBekreftedeMål(getDefaultState()), view: "inngang", expandedPost: null }
 }
 
 export function useFordelingState() {
@@ -38,65 +47,75 @@ export function useFordelingState() {
         lønn: state.lønn,
         poster: state.poster,
         interaksjon: state.interaksjon,
+        fasteTrekkFullført: state.fasteTrekkFullført ?? null,
       })
     }
-  }, [state.lønn, state.poster, state.interaksjon])
+  }, [state.lønn, state.poster, state.interaksjon, state.fasteTrekkFullført])
 
-  const start = useCallback((lønn: number) => {
-    const fordeling = beregnStandardfordeling(lønn)
-    const defaults = getDefaultState()
-
-    const poster = { ...defaults.poster }
-    for (const [key, beløp] of Object.entries(fordeling)) {
-      poster[key as PostId].månedlig = beløp
-    }
-
-    // Buffer-mål settes automatisk til 1,5× lønn
-    poster.buffer.mål = beregnBufferMål(lønn)
-
-    setState({
-      lønn,
-      poster,
-      interaksjon: defaults.interaksjon,
-      view: "dashboard",
-      expandedPost: null,
+  /** Første gang: lag forslag ut fra lønn (og faste utgifter fra Utgifter hvis valgt). */
+  const start = useCallback((lønn: number, fasteFraUtgifter: number | null) => {
+    setState((prev) => {
+      const defaults = getDefaultState()
+      const poster = structuredClone(prev.poster)
+      if (!poster.buffer.mål) poster.buffer.mål = beregnBufferMål(lønn)
+      lagForslag(lønn, poster, fasteFraUtgifter)
+      return {
+        ...prev,
+        lønn,
+        poster,
+        interaksjon: { ...defaults.interaksjon, fasteUtgifter: fasteFraUtgifter != null },
+        view: "dashboard",
+        expandedPost: null,
+      }
     })
   }, [])
 
-  const endrePost = useCallback(
-    (postId: PostId, nyVerdi: number) => {
-      setState((prev) => {
-        if (!prev.lønn) return prev
-        const poster = structuredClone(prev.poster)
+  /** Ny lønn fra oversikten: beholder brukerens valg så langt det går. */
+  const endreLønn = useCallback((nyLønn: number) => {
+    const bufferBekreftet = "buffer" in lesBekreftedeMål()
+    setState((prev) => {
+      if (!prev.lønn || nyLønn === prev.lønn) return prev
+      const poster = structuredClone(prev.poster)
+      // Buffer-målet følger lønna så lenge det er vårt forslag (ikke valgt av brukeren)
+      if (!bufferBekreftet && poster.buffer.mål === beregnBufferMål(prev.lønn)) {
+        poster.buffer.mål = beregnBufferMål(nyLønn)
+      }
+      tilpassTilNyLønn(nyLønn, poster, prev.interaksjon.fasteUtgifter)
+      return { ...prev, lønn: nyLønn, poster }
+    })
+  }, [])
 
-        const gammel = poster[postId].månedlig
-        const andrePoster = (Object.keys(poster) as PostId[]).filter(
-          (k) => k !== postId && k !== "fasteUtgifter"
-        )
+  const endrePost = useCallback((postId: PostId, nyVerdi: number) => {
+    setState((prev) => {
+      if (!prev.lønn) return prev
+      const poster = structuredClone(prev.poster)
 
-        // Cap the new value so the slider can only take from other adjustable posts,
-        // never from fasteUtgifter (which represents real financial obligations).
-        const sumAndrePoster = andrePoster.reduce(
-          (s, k) => s + (poster[k].månedlig ?? 0),
-          0
-        )
-        const begrensetVerdi = Math.min(nyVerdi, gammel + sumAndrePoster)
+      const gammel = poster[postId].månedlig
+      const andrePoster = (Object.keys(poster) as PostId[]).filter(
+        (k) => k !== postId && k !== "fasteUtgifter" && !erMålNådd(poster[k])
+      )
 
-        const differanse = begrensetVerdi - gammel
-        poster[postId].månedlig = begrensetVerdi
+      // Slideren kan bare ta fra andre spareposter, aldri fra faste utgifter
+      // (som er reelle forpliktelser).
+      const sumAndrePoster = andrePoster.reduce(
+        (s, k) => s + (poster[k].månedlig ?? 0),
+        0
+      )
+      const begrensetVerdi = Math.max(0, Math.min(nyVerdi, gammel + sumAndrePoster))
 
-        // Fordel differansen likt på andre poster (unntatt fasteUtgifter)
-        fordelLikt(differanse, andrePoster, poster, prev.lønn)
+      const differanse = begrensetVerdi - gammel
+      poster[postId].månedlig = begrensetVerdi
 
-        return {
-          ...prev,
-          poster,
-          interaksjon: { ...prev.interaksjon, [postId]: true },
-        }
-      })
-    },
-    []
-  )
+      // Fordel differansen likt på andre poster (unntatt faste utgifter)
+      fordelLikt(differanse, andrePoster, poster, prev.lønn)
+
+      return {
+        ...prev,
+        poster,
+        interaksjon: { ...prev.interaksjon, [postId]: true },
+      }
+    })
+  }, [])
 
   const endreFasteUtgifter = useCallback((nyVerdi: number) => {
     setState((prev) => {
@@ -112,56 +131,50 @@ export function useFordelingState() {
     })
   }, [])
 
-  const endreAlleredeSpart = useCallback(
-    (postId: PostId, verdi: number) => {
-      setState((prev) => {
-        const poster = structuredClone(prev.poster)
-        poster[postId].alleredeSpart = verdi
-
-        // Hvis målet er nådd, sett månedlig til 0
-        const mål = poster[postId].mål ?? 0
-        if (mål > 0 && verdi >= mål) {
-          poster[postId].månedlig = 0
-        }
-
-        return { ...prev, poster }
-      })
-    },
-    []
-  )
-
-  const endreMål = useCallback((postId: PostId, verdi: number | null) => {
+  const endreAlleredeSpart = useCallback((postId: PostId, verdi: number) => {
     setState((prev) => {
       const poster = structuredClone(prev.poster)
-      poster[postId].mål = verdi
-
-      // Hvis målet er nådd, sett månedlig til 0
-      const alleredeSpart = poster[postId].alleredeSpart ?? 0
-      if (verdi && verdi > 0 && alleredeSpart >= verdi) {
-        poster[postId].månedlig = 0
-      }
-
+      poster[postId].alleredeSpart = verdi
+      // Mål nådd: frigjør månedsbeløpet til de andre sparepostene
+      if (prev.lønn && erMålNådd(poster[postId])) frigjørPost(postId, prev.lønn, poster)
       return { ...prev, poster }
     })
   }, [])
 
+  const endreMål = useCallback((postId: PostId, verdi: number | null) => {
+    // Målene eies av «Definer taket» — lagre der også
+    if ((DELTE_MÅL as PostId[]).includes(postId)) {
+      lagreMålFraFordeling(postId as DeltMålId, verdi)
+    }
+    setState((prev) => {
+      const poster = structuredClone(prev.poster)
+      poster[postId].mål = verdi
+      if (prev.lønn && erMålNådd(poster[postId])) frigjørPost(postId, prev.lønn, poster)
+      return { ...prev, poster }
+    })
+  }, [])
+
+  /** Tilbake til forslaget. Mål og «allerede spart» beholdes. */
   const tilbakestill = useCallback(() => {
+    const fasteFraUtgifter = lesUtgifterTotal()
     setState((prev) => {
       if (!prev.lønn) return prev
-      const fordeling = beregnStandardfordeling(prev.lønn)
       const defaults = getDefaultState()
-      const poster = { ...defaults.poster }
-      for (const [key, beløp] of Object.entries(fordeling)) {
-        poster[key as PostId].månedlig = beløp
-      }
-      poster.buffer.mål = beregnBufferMål(prev.lønn)
-
+      const poster = structuredClone(prev.poster)
+      lagForslag(prev.lønn, poster, fasteFraUtgifter)
       return {
         ...prev,
         poster,
-        interaksjon: defaults.interaksjon,
+        interaksjon: { ...defaults.interaksjon, fasteUtgifter: fasteFraUtgifter != null },
       }
     })
+  }, [])
+
+  const fullførFasteTrekk = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      fasteTrekkFullført: new Date().toISOString().slice(0, 10),
+    }))
   }, [])
 
   const toggleExpanded = useCallback((postId: PostId) => {
@@ -187,11 +200,13 @@ export function useFordelingState() {
   return {
     state,
     start,
+    endreLønn,
     endrePost,
     endreFasteUtgifter,
     endreAlleredeSpart,
     endreMål,
     tilbakestill,
+    fullførFasteTrekk,
     toggleExpanded,
     visView,
     nullstill,

@@ -37,6 +37,8 @@ export interface FordelingState {
   lønn: number | null
   poster: Record<PostId, PostState>
   interaksjon: Record<PostId, boolean>
+  /** ISO-dato for når brukeren huket av alle faste trekk, ellers null. */
+  fasteTrekkFullført?: string | null
 }
 
 export interface FordelingViewState extends FordelingState {

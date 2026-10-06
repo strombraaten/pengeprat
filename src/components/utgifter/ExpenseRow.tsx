@@ -1,6 +1,6 @@
 import type React from "react"
 import { Button } from "@/components/ui/button"
-import { X } from "@phosphor-icons/react"
+import { XIcon } from "@phosphor-icons/react"
 
 interface ExpenseRowProps {
   label: string
@@ -43,7 +43,7 @@ export const ExpenseRow: React.FC<ExpenseRowProps> = ({
         className="h-8 w-8 p-0"
         aria-label={`Fjern ${label}`}
       >
-        <X size={16} />
+        <XIcon size={16} />
       </Button>
     </div>
   )

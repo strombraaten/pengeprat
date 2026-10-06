@@ -1,5 +1,6 @@
 ---
 import AppLayout from "@/layouts/app.astro"
+import Laster from "@/components/Laster.astro"
 import { SparemaalApp } from "@/components/sparemaal/SparemaalApp"
 ---
 
@@ -8,6 +9,8 @@ import { SparemaalApp } from "@/components/sparemaal/SparemaalApp"
   description="De fleste sparemål har et tak. Finn riktig sum for hvert mål — buffer, ferie, framtidsfri, store livshendelser og pensjon."
 >
   <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
-    <SparemaalApp client:load />
+    <SparemaalApp client:only="react">
+      <Laster slot="fallback" />
+    </SparemaalApp>
   </div>
 </AppLayout>

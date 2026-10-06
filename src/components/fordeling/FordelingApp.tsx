@@ -4,64 +4,64 @@ import { FordelingDashboard } from "./FordelingDashboard"
 import { FasteTrekk } from "./FasteTrekk"
 import { Feiring } from "./Feiring"
 
+// Konfetti er pynt — den skal aldri kunne stoppe brukeren fra å komme videre.
+// Lastes først når den trengs, og hoppes over ved «redusert bevegelse».
+async function skytKonfetti() {
+  try {
+    const { default: confetti } = await import("canvas-confetti")
+    const felles = { disableForReducedMotion: true }
+    confetti({ ...felles, particleCount: 120, spread: 70, origin: { y: 0.6 } })
+    setTimeout(
+      () => confetti({ ...felles, particleCount: 80, angle: 60, spread: 55, origin: { x: 0 } }),
+      250
+    )
+    setTimeout(
+      () => confetti({ ...felles, particleCount: 80, angle: 120, spread: 55, origin: { x: 1 } }),
+      400
+    )
+  } catch {
+    // Ingen konfetti — helt greit
+  }
+}
+
 export function FordelingApp() {
   const {
     state,
     start,
+    endreLønn,
     endrePost,
     endreFasteUtgifter,
     endreAlleredeSpart,
     endreMål,
     tilbakestill,
+    fullførFasteTrekk,
     visView,
   } = useFordelingState()
 
-  // Fires confetti and transitions to the celebration screen.
-  // Called from FasteTrekk once all transfers are checked off.
-  async function handleFullført() {
-    const { default: confetti } = await import(
-      // @ts-expect-error – CDN-import without types
-      "https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.module.mjs"
-    )
-    confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } })
-    setTimeout(
-      () =>
-        confetti({
-          particleCount: 80,
-          angle: 60,
-          spread: 55,
-          origin: { x: 0 },
-        }),
-      250
-    )
-    setTimeout(
-      () =>
-        confetti({
-          particleCount: 80,
-          angle: 120,
-          spread: 55,
-          origin: { x: 1 },
-        }),
-      400
-    )
+  // Kalles fra FasteTrekk når alle trekk er huket av
+  function handleFullført() {
+    fullførFasteTrekk()
+    void skytKonfetti()
     setTimeout(() => visView("feiring"), 1200)
   }
 
-  switch (state.view) {
-    case "inngang":
-      return <Inngang onStart={start} />
+  // Uten lønn finnes det ingen plan å vise — start på inngangen
+  if (state.view === "inngang" || !state.lønn) {
+    return <Inngang onStart={start} />
+  }
 
+  switch (state.view) {
     case "dashboard":
       return (
         <FordelingDashboard
-          lønn={state.lønn!}
+          lønn={state.lønn}
           poster={state.poster}
           onEndrePost={endrePost}
           onEndreFasteUtgifter={endreFasteUtgifter}
           onEndreAlleredeSpart={endreAlleredeSpart}
           onEndreMål={endreMål}
           onTilbakestill={tilbakestill}
-          onEndreLønn={() => visView("inngang")}
+          onEndreLønn={endreLønn}
           onBekreft={() => visView("fasteTrekk")}
         />
       )
@@ -69,7 +69,6 @@ export function FordelingApp() {
     case "fasteTrekk":
       return (
         <FasteTrekk
-          lønn={state.lønn!}
           poster={state.poster}
           onTilbake={() => visView("dashboard")}
           onFullført={handleFullført}
