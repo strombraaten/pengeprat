@@ -2,7 +2,7 @@
 
 Alle vil bare slippe å tenke på penger. Pengeprat er en samling enkle verktøy som gir deg akkurat den følelsen — uten innlogging, uten sporing, alt skjer lokalt i nettleseren.
 
-**[simenlager.no/pengeprat](https://simenlager.no/pengeprat)**
+**[pengeprat.simenlager.no](https://pengeprat.simenlager.no)**
 
 ## Filosofien bak
 
@@ -19,12 +19,28 @@ Du trenger ikke nå alle sparemålene dine. Det eneste du trenger er å vite at 
 
 ## Verktøy
 
+Verktøyene er steg som bygger på hverandre. Resultatet samles i én plan.
+
 | # | Verktøy | Beskrivelse |
 |---|---|---|
-| 01 | [Månedlige utgifter](https://simenlager.no/pengeprat/utgifter) | Kartlegg faste månedlige utgifter og se fordelingen per kategori |
-| 02 | [Fordeling](https://simenlager.no/pengeprat/fordeling) | Finn ut hvor mye du kan spare og fordel sparingen din |
-| 03 | [Definer taket](https://simenlager.no/pengeprat/sparemaal) | Sett en øvre grense for sparemålene dine og finn ut når du er ferdig spart |
-| 04 | Fått inn en uventet sum? | *(kommer snart)* Intelligente forslag basert på dine sparemål og økonomi |
+| 01 | [Månedlige utgifter](https://pengeprat.simenlager.no/utgifter) | Kartlegg faste månedlige utgifter. Summen foreslås som faste utgifter i Fordeling. |
+| 02 | [Fordeling](https://pengeprat.simenlager.no/fordeling) | Fordel lønna på spareområdene og sett opp faste trekk. |
+| 03 | [Definer taket](https://pengeprat.simenlager.no/sparemaal) | Sett et tak for hvert sparemål. Målene brukes i Fordeling til å regne ut når du er i mål. |
+| 04 | [Uventet sum](https://pengeprat.simenlager.no/uventet-sum) | Fordel en bonus eller arv — med forslag ut fra hva som mangler på målene dine. |
+| — | [Min plan](https://pengeprat.simenlager.no/plan) | Alt samlet: månedlige trekk, sparemål og når du er i mål. Utskrift og sikkerhetskopi. |
+
+## Dokumentasjon
+
+- [docs/produkt.md](docs/produkt.md) — prinsippene, flyten mellom stegene og reglene i beregningene
+- [docs/arkitektur.md](docs/arkitektur.md) — hvordan koden er satt sammen, lagring, testing
+
+## Utvikling
+
+```bash
+npm install
+npm run dev      # http://localhost:4321
+npm run check    # lint, typesjekk, tester og bygg — det samme som CI kjører
+```
 
 ## Stack
 
@@ -32,5 +48,5 @@ Du trenger ikke nå alle sparemålene dine. Det eneste du trenger er å vite at 
 - TypeScript
 - [Tailwind CSS v4](https://tailwindcss.com)
 - [shadcn/ui](https://ui.shadcn.com)
+- [Vitest](https://vitest.dev) for tester
 - localStorage for all persistence — ingen backend
-

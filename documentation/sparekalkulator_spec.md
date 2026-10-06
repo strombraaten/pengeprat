@@ -1,3 +1,5 @@
+> **Historisk dokument.** Dette var spesifikasjonen for den første versjonen. Gjeldende beskrivelse av produktlogikken står i [docs/produkt.md](../docs/produkt.md), og arkitekturen i [docs/arkitektur.md](../docs/arkitektur.md).
+
 # Pengeprat – Sparekalkulator: Implementeringsdokument for Claude Code
 
 ## Kontekst
